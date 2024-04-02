@@ -45,7 +45,7 @@ def parse_args():
     parser.add_argument(
         "--eval",
         action='store_true',
-        default=False,
+        default=True,
         help="Whether to perform evaluation in train")
     parser.add_argument(
         "-r", "--resume", default=None, help="weights path for resume")
@@ -70,7 +70,7 @@ def parse_args():
     parser.add_argument(
         "--use_vdl",
         type=bool,
-        default=False,
+        default=True,
         help="whether to record the data to VisualDL.")
     parser.add_argument(
         '--vdl_log_dir',

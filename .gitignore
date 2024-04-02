@@ -80,6 +80,8 @@ dataset/wider_face/wider_face_split
 
 ppdet/version.py
 
+log_dir
+
 # NPU meta folder
 kernel_meta/
 
