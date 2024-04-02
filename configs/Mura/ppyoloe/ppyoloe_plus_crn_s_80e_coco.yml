@@ -1,6 +1,6 @@
 _BASE_: [
-  '../datasets/coco_detection.yml',
-  '../runtime.yml',
+  '../../datasets/voc_mura_com.yml',
+  '../../runtime.yml',
   './_base_/optimizer_80e.yml',
   './_base_/ppyoloe_plus_crn.yml',
   './_base_/ppyoloe_plus_reader.yml',

@@ -62,23 +62,23 @@ def split_voc_dataset(dataset_dir, val_percent, test_percent, save_dir):
     test_image_anno_list  = image_anno_list[train_num + val_num:]
 
     os.makedirs(save_dir, exist_ok=True)
-    with open(osp.join(save_dir, 'train_list.txt'), mode='w', encoding='utf-8') as f:
+    with open(osp.join(save_dir, 'train.txt'), mode='w', encoding='utf-8') as f:
         for x in train_image_anno_list:
             file  = osp.join("02_JPEGImages", x[0])
             label = osp.join("03_Labels/xml", x[1])
             f.write('{} {}\n'.format(file, label))
-    with open(osp.join(save_dir, 'val_list.txt'), mode='w', encoding='utf-8') as f:
+    with open(osp.join(save_dir, 'val.txt'), mode='w', encoding='utf-8') as f:
         for x in val_image_anno_list:
             file  = osp.join("02_JPEGImages", x[0])
             label = osp.join("03_Labels/xml", x[1])
             f.write('{} {}\n'.format(file, label))
     if len(test_image_anno_list):
-        with open(osp.join(save_dir, 'test_list.txt'), mode='w', encoding='utf-8') as f:
+        with open(osp.join(save_dir, 'test.txt'), mode='w', encoding='utf-8') as f:
             for x in test_image_anno_list:
                 file  = osp.join("02_JPEGImages", x[0])
                 label = osp.join("03_Labels/xml", x[1])
                 f.write('{} {}\n'.format(file, label))
-    with open(osp.join(save_dir, 'labels.txt'), mode='w', encoding='utf-8') as f:
+    with open(osp.join(save_dir, 'label_list.txt'), mode='w', encoding='utf-8') as f:
         for l in sorted(label_list):
             f.write('{}\n'.format(l))
 
