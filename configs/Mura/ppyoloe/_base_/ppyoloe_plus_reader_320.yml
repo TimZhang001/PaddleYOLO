@@ -1,6 +1,6 @@
 worker_num: 4
-eval_height: &eval_height 320
-eval_width: &eval_width 320
+eval_height: &eval_height 512
+eval_width: &eval_width 512
 eval_size: &eval_size [*eval_height, *eval_width]
 
 TrainReader:

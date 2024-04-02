@@ -1,5 +1,5 @@
-input_height: &input_height 640
-input_width: &input_width 640
+input_height: &input_height 512
+input_width: &input_width 512
 input_size: &input_size [*input_height, *input_width]
 mosaic_epoch: &mosaic_epoch 490 # last 10 epochs close mosaic, totally 500 epochs as default
 
@@ -19,7 +19,7 @@ TrainReader:
   drop_last: False
   use_shared_memory: True
   collate_batch: True
-  mosaic_epoch: *mosaic_epoch
+  #mosaic_epoch: *mosaic_epoch
 
 
 EvalReader:
@@ -34,7 +34,7 @@ EvalReader:
 
 TestReader:
   inputs_def:
-    image_shape: [3, 640, 640]
+    image_shape: [3, 512, 512]
   sample_transforms:
     - Decode: {}
     - Resize: {target_size: *input_size, keep_ratio: True, interp: 1}
