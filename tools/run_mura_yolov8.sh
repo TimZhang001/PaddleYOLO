@@ -1,5 +1,5 @@
 model_name=yolov8 # 可修改，如 yolov7
-job_name=yolov8_s_500e_coco # 可修改，如 yolov7_tiny_300e_coco
+job_name=yolov8_m_500e_coco # 可修改，如 yolov7_tiny_300e_coco
 project_name=Mura
 config=configs/${project_name}/${model_name}/${job_name}.yml
 log_dir=log_dir/${job_name}

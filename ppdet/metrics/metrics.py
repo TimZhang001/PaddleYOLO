@@ -187,7 +187,8 @@ class VOCMetric(Metric):
                  evaluate_difficult=False,
                  classwise=False,
                  output_eval=None,
-                 save_prediction_only=False):
+                 save_prediction_only=False,
+                 out_dir=None):
         assert os.path.isfile(label_list), \
                 "label_list {} not a file".format(label_list)
         self.clsid2catid, self.catid2name = get_categories('VOC', label_list)
@@ -197,6 +198,7 @@ class VOCMetric(Metric):
         self.evaluate_difficult = evaluate_difficult
         self.output_eval = output_eval
         self.save_prediction_only = save_prediction_only
+        self.out_dir = out_dir
         self.detection_map = DetectionMAP(
             class_num=class_num,
             overlap_thresh=overlap_thresh,
@@ -278,10 +280,10 @@ class VOCMetric(Metric):
         logger.info("Accumulating evaluatation results...")
         self.detection_map.accumulate()
 
-    def log(self):
-        map_stat = 100. * self.detection_map.get_map()
+    def log(self, epoch=None):
+        map_stat = 100. * self.detection_map.get_map(self.out_dir, epoch)
         logger.info("mAP({:.2f}, {}) = {:.2f}%".format(self.overlap_thresh,
                                                        self.map_type, map_stat))
 
-    def get_results(self):
-        return {'bbox': [self.detection_map.get_map()]}
+    def get_results(self, epoch=None):
+        return {'bbox': [self.detection_map.get_map(self.out_dir, epoch)]}

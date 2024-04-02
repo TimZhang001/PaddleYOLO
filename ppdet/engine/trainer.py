@@ -251,7 +251,7 @@ class Trainer(object):
             output_eval = self.cfg['output_eval'] \
                 if 'output_eval' in self.cfg else None
             save_prediction_only = self.cfg.get('save_prediction_only', False)
-
+            out_dir = os.path.dirname(self.cfg.get('weights', None))
             self._metrics = [
                 VOCMetric(
                     label_list=self.dataset.get_label_list(),
@@ -259,7 +259,8 @@ class Trainer(object):
                     map_type=self.cfg.map_type,
                     classwise=classwise,
                     output_eval=output_eval,
-                    save_prediction_only=save_prediction_only)
+                    save_prediction_only=save_prediction_only,
+                    out_dir=out_dir)
             ]
         else:
             logger.warning("Metric not support for metric type {}".format(
@@ -493,7 +494,7 @@ class Trainer(object):
 
                 with paddle.no_grad():
                     self.status['save_best_model'] = True
-                    self._eval_with_loader(self._eval_loader)
+                    self._eval_with_loader(self._eval_loader, epoch_id)
 
             if is_snapshot and self.use_ema:
                 # reset original weight
@@ -502,7 +503,7 @@ class Trainer(object):
 
         self._compose_callback.on_train_end(self.status)
 
-    def _eval_with_loader(self, loader):
+    def _eval_with_loader(self, loader, epoch_id=0):
         sample_num = 0
         tic = time.time()
         self._compose_callback.on_epoch_begin(self.status)
@@ -549,7 +550,7 @@ class Trainer(object):
         # accumulate metric to log out
         for metric in self._metrics:
             metric.accumulate()
-            metric.log()
+            metric.log(epoch_id)
         self._compose_callback.on_epoch_end(self.status)
         # reset metric states for metric may performed multiple times
         self._reset_metrics()
@@ -565,7 +566,7 @@ class Trainer(object):
             self.model = paddle.DataParallel(
                 self.model, find_unused_parameters=find_unused_parameters)
         with paddle.no_grad():
-            self._eval_with_loader(self.loader)
+            self._eval_with_loader(self.loader, epoch_id=9999)
 
     def _eval_with_loader_slice(self,
                                 loader,
@@ -573,7 +574,8 @@ class Trainer(object):
                                 overlap_ratio=[0.25, 0.25],
                                 combine_method='nms',
                                 match_threshold=0.6,
-                                match_metric='iou'):
+                                match_metric='iou',
+                                epoch_id=0):
         sample_num = 0
         tic = time.time()
         self._compose_callback.on_epoch_begin(self.status)
@@ -643,7 +645,7 @@ class Trainer(object):
         # accumulate metric to log out
         for metric in self._metrics:
             metric.accumulate()
-            metric.log()
+            metric.log(epoch_id)
         self._compose_callback.on_epoch_end(self.status)
         # reset metric states for metric may performed multiple times
         self._reset_metrics()
@@ -657,7 +659,8 @@ class Trainer(object):
         with paddle.no_grad():
             self._eval_with_loader_slice(self.loader, slice_size, overlap_ratio,
                                          combine_method, match_threshold,
-                                         match_metric)
+                                         match_metric,
+                                         epoch_id=9999)
 
     def slice_predict(self,
                       images,

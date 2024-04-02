@@ -21,6 +21,7 @@ import os
 import sys
 import numpy as np
 import itertools
+import matplotlib.pyplot as plt
 
 from ppdet.utils.logger import setup_logger
 logger = setup_logger(__name__)
@@ -38,24 +39,36 @@ def draw_pr_curve(precision,
                   recall,
                   iou=0.5,
                   out_dir='pr_curve',
-                  file_name='precision_recall_curve.jpg'):
+                  class_name=None):
     if not os.path.exists(out_dir):
         os.makedirs(out_dir)
-    output_path = os.path.join(out_dir, file_name)
-    try:
-        import matplotlib.pyplot as plt
-    except Exception as e:
-        logger.error('Matplotlib not found, plaese install matplotlib.'
-                     'for example: `pip install matplotlib`.')
-        raise e
-    plt.cla()
-    plt.figure('P-R Curve')
+    
+    file_name   = '{}_precision_recall_curve.jpg'.format(class_name)
+    output_path = os.path.join(out_dir, file_name)  
+    plt.figure(dpi=200)
     plt.title('Precision/Recall Curve(IoU={})'.format(iou))
     plt.xlabel('Recall')
     plt.ylabel('Precision')
     plt.grid(True)
     plt.plot(recall, precision)
+    plt.show()
     plt.savefig(output_path)
+    plt.close()
+
+    file_name   = '{}_miss_overkill_curve.jpg'.format(class_name)
+    output_path = os.path.join(out_dir, file_name)  
+    var_length  = len(precision)
+    threshold   = np.arange(0, 1, 1.0 / var_length)
+    plt.figure(dpi=200)
+    plt.title('miss/overkill Curve(IoU={})'.format(iou))
+    plt.xlabel('miss_overkill')
+    plt.ylabel('threshold')
+    plt.grid(True)
+    plt.plot(threshold, precision, label='precision')
+    plt.plot(threshold, recall,    label='recall')
+    plt.show()
+    plt.savefig(output_path)
+    plt.close()
 
 
 def bbox_area(bbox, is_bbox_normalized):
@@ -198,15 +211,13 @@ class DetectionMAP(object):
         mAP = 0.
         valid_cnt = 0
         eval_results = []
-        for score_pos, count in zip(self.class_score_poss,
-                                    self.class_gt_counts):
+        for score_pos, count in zip(self.class_score_poss, self.class_gt_counts):
             if count == 0: continue
             if len(score_pos) == 0:
                 valid_cnt += 1
                 continue
 
-            accum_tp_list, accum_fp_list = \
-                    self._get_tp_fp_accum(score_pos)
+            accum_tp_list, accum_fp_list = self._get_tp_fp_accum(score_pos)
             precision = []
             recall = []
             for ac_tp, ac_fp in zip(accum_tp_list, accum_fp_list):
@@ -252,12 +263,13 @@ class DetectionMAP(object):
         self.eval_results = eval_results
         self.mAP = mAP / float(valid_cnt) if valid_cnt > 0 else mAP
 
-    def get_map(self):
+    def get_map(self, out_dir=None, epoch_id=None):
         """
         Get mAP result
         """
         if self.mAP is None:
             logger.error("mAP is not calculated.")
+        
         if self.classwise:
             # Compute per-category AP and PR curve
             try:
@@ -269,17 +281,15 @@ class DetectionMAP(object):
                 raise e
             results_per_category = []
             for eval_result in self.eval_results:
-                results_per_category.append(
-                    (str(eval_result['class']),
-                     '{:0.3f}'.format(float(eval_result['ap']))))
-                draw_pr_curve(
-                    eval_result['precision'],
-                    eval_result['recall'],
-                    out_dir='voc_pr_curve',
-                    file_name='{}_precision_recall_curve.jpg'.format(
-                        eval_result['class']))
+                results_per_category.append((str(eval_result['class']), '{:0.3f}'.format(float(eval_result['ap']))))
+                out_dir  = out_dir if out_dir else 'voc_pr_curve'
+                epoch_id = epoch_id if epoch_id else 0
+                draw_pr_curve(eval_result['precision'],
+                              eval_result['recall'],
+                              out_dir=os.path.join(out_dir, 'epoch_{}'.format(epoch_id)),
+                              class_name=eval_result['class'])
 
-            num_columns = min(6, len(results_per_category) * 2)
+            num_columns     = min(6, len(results_per_category) * 2)
             results_flatten = list(itertools.chain(*results_per_category))
             headers = ['category', 'AP'] * (num_columns // 2)
             results_2d = itertools.zip_longest(* [
@@ -289,8 +299,7 @@ class DetectionMAP(object):
             table_data += [result for result in results_2d]
             table = AsciiTable(table_data)
             logger.info('Per-category of VOC AP: \n{}'.format(table.table))
-            logger.info(
-                "per-category PR curve has output to voc_pr_curve folder.")
+            logger.info("per-category PR curve has output to voc_pr_curve folder.")
         return self.mAP
 
     def _get_tp_fp_accum(self, score_pos_list):

@@ -12,6 +12,7 @@ log_iter: 50
 snapshot_epoch: 5
 weights: output/yolov8_m_500e_coco/model_final
 pretrain_weights: https://paddledet.bj.bcebos.com/models/yolov8_m_500e_coco.pdparams
+classwise: True
 
 YOLOv8CSPDarkNet:
   last_stage_ch: 768 # The actual channel is int(768 * width_mult), not int(1024 * width_mult) as in YOLOv5

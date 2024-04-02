@@ -12,6 +12,7 @@ log_iter: 50
 snapshot_epoch: 5
 weights: output/yolov8_s_500e_coco/model_final
 pretrain_weights: https://paddledet.bj.bcebos.com/models/yolov8_s_500e_coco.pdparams
+classwise: True
 
 
 TrainReader:

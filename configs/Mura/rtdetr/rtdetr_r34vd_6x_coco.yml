@@ -10,6 +10,7 @@ weights: output/rtdetr_r34vd_6x_coco/model_final
 find_unused_parameters: True
 log_iter: 200
 snapshot_epoch: 5
+classwise: True
 
 pretrain_weights: https://bj.bcebos.com/v1/paddledet/models/pretrained/ResNet34_vd_pretrained.pdparams
 ResNet:

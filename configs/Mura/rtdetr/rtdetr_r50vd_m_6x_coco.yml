@@ -10,6 +10,7 @@ weights: output/rtdetr_r50vd_m_6x_coco/model_final
 find_unused_parameters: True
 log_iter: 200
 snapshot_epoch: 5
+classwise: True
 
 HybridEncoder:
   hidden_dim: 256
