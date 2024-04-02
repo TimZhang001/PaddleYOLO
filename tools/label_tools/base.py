@@ -56,3 +56,8 @@ def path_normalization(path):
     else:
         path = other_sep.join(path.split(win_sep))
     return path
+
+def add_text_file(filename, content):
+    with open(filename, 'a') as file:
+        file.write(content)
+        file.write('\n')

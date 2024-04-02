@@ -15,15 +15,13 @@
 import os.path as osp
 import random
 from .utils import list_files, is_pic, replace_ext, read_seg_ann
-import paddlex.utils.logging as logging
 
 
 def split_seg_dataset(dataset_dir, val_percent, test_percent, save_dir):
     if not osp.exists(osp.join(dataset_dir, "JPEGImages")):
-        logging.error("\'JPEGImages\' is not found in {}!".format(dataset_dir))
+        print("\'JPEGImages\' is not found in {}!".format(dataset_dir))
     if not osp.exists(osp.join(dataset_dir, "Annotations")):
-        logging.error("\'Annotations\' is not found in {}!".format(
-            dataset_dir))
+        print("\'Annotations\' is not found in {}!".format(dataset_dir))
 
     all_image_files = list_files(osp.join(dataset_dir, "JPEGImages"))
 
@@ -40,8 +38,7 @@ def split_seg_dataset(dataset_dir, val_percent, test_percent, save_dir):
             if osp.exists(osp.join(dataset_dir, "Annotations", anno_name)):
                 image_anno_list.append([image_file, anno_name])
             else:
-                logging.error("The annotation file {} doesn't exist!".format(
-                    anno_name))
+                print("The annotation file {} doesn't exist!".format(anno_name))
 
     if not osp.exists(osp.join(dataset_dir, "labels.txt")):
         for image_anno in image_anno_list:

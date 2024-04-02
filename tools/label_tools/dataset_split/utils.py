@@ -69,7 +69,7 @@ def is_pic(filename):
     Args:
         filename: 文件路径
     """
-    suffixes = {'JPEG', 'jpeg', 'JPG', 'jpg', 'BMP', 'bmp', 'PNG', 'png'}
+    suffixes = {'JPEG', 'jpeg', 'JPG', 'jpg', 'BMP', 'bmp', 'PNG', 'png', 'tif', 'tiff'}
     suffix = filename.strip().split('.')[-1]
     if suffix not in suffixes:
         return False
