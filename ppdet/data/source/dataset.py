@@ -127,7 +127,7 @@ class DetDataset(Dataset):
         return os.path.join(self.dataset_dir, self.anno_path)
 
 
-def _is_valid_file(f, extensions=('.jpg', '.jpeg', '.png', '.bmp')):
+def _is_valid_file(f, extensions=('.jpg', '.jpeg', '.png', '.bmp', '.tif')):
     return f.lower().endswith(extensions)
 
 

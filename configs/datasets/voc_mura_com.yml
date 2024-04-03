@@ -1,6 +1,6 @@
 metric: VOC
 map_type: 11point
-num_classes: 8
+num_classes: 7
 
 TrainDataset:
   name: VOCDataSet
@@ -18,4 +18,5 @@ EvalDataset:
 
 TestDataset:
   name: ImageFolder
+  dataset_dir: /raid/zhangss/dataset/Detection/Mura_Project/Commons/test
   anno_path: /raid/zhangss/dataset/Detection/Mura_Project/Commons/label_list.txt

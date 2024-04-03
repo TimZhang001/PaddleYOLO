@@ -69,6 +69,7 @@ def parse_args():
     parser.add_argument(
         "--classwise",
         action="store_true",
+        default=True,
         help="whether per-category AP and draw P-R Curve or not.")
 
     parser.add_argument(

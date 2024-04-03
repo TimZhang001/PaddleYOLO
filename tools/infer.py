@@ -45,7 +45,7 @@ def parse_args():
     parser.add_argument(
         "--infer_dir",
         type=str,
-        default=None,
+        default="/raid/zhangss/dataset/Detection/Mura_Project/Commons/02_JPEGImages/",
         help="Directory for images to perform inference on.")
     parser.add_argument(
         "--infer_img",
@@ -60,7 +60,7 @@ def parse_args():
     parser.add_argument(
         "--draw_threshold",
         type=float,
-        default=0.5,
+        default=0.01,
         help="Threshold to reserve the result for visualization.")
     parser.add_argument(
         "--slim_config",
@@ -80,7 +80,7 @@ def parse_args():
     parser.add_argument(
         "--save_results",
         type=bool,
-        default=False,
+        default=True,
         help="Whether to save inference results to output_dir.")
     parser.add_argument(
         "--slice_infer",
@@ -143,7 +143,7 @@ def get_test_images(infer_dir, infer_img):
     infer_dir = os.path.abspath(infer_dir)
     assert os.path.isdir(infer_dir), \
         "infer_dir {} is not a directory".format(infer_dir)
-    exts = ['jpg', 'jpeg', 'png', 'bmp']
+    exts = ['jpg', 'jpeg', 'png', 'bmp', 'tif']
     exts += [ext.upper() for ext in exts]
     for ext in exts:
         images.update(glob.glob('{}/*.{}'.format(infer_dir, ext)))
@@ -190,6 +190,7 @@ def run(FLAGS, cfg):
 def main():
     FLAGS = parse_args()
     cfg = load_config(FLAGS.config)
+    FLAGS.output_dir = os.path.join(os.path.dirname(cfg['weights']), FLAGS.output_dir)
     merge_args(cfg, FLAGS)
     merge_config(FLAGS.opt)
 

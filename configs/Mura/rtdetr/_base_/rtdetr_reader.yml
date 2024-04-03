@@ -3,7 +3,7 @@ TrainReader:
   sample_transforms:
     - Decode: {}
     - RandomDistort: {prob: 0.8}
-    - RandomExpand: {fill_value: [123.675, 116.28, 103.53]}
+    - RandomExpand: {ratio: 1.25, fill_value: [123.675, 116.28, 103.53]} # 随机Canvas填充，可选的OP
     - RandomCrop: {prob: 0.8}
     - RandomFlip: {}
   batch_transforms:

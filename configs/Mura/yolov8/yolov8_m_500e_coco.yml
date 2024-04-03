@@ -8,7 +8,7 @@ _BASE_: [
 depth_mult: 0.67
 width_mult: 0.75
 
-log_iter: 50
+log_iter: 200
 snapshot_epoch: 5
 weights: output/yolov8_m_500e_coco/model_final
 pretrain_weights: https://paddledet.bj.bcebos.com/models/yolov8_m_500e_coco.pdparams

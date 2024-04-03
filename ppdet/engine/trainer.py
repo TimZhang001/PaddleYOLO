@@ -25,9 +25,11 @@ from tqdm import tqdm
 import numpy as np
 import typing
 from PIL import Image, ImageOps, ImageFile
+from PIL import ImageDraw
 
 ImageFile.LOAD_TRUNCATED_IMAGES = True
 
+import cv2
 import paddle
 import paddle.nn as nn
 import paddle.distributed as dist
@@ -132,6 +134,9 @@ class Trainer(object):
                                               self._eval_batch_sampler)
         # TestDataset build after user set images, skip loader creation here
 
+        
+        
+        
         # get Params
         print_params = self.cfg.get('print_params', False)
         if print_params:
@@ -369,7 +374,29 @@ class Trainer(object):
             self.loader.dataset.set_epoch(epoch_id)
             model.train()
             iter_tic = time.time()
+            save_train_data = True
             for step_id, data in enumerate(self.loader):
+                
+                # 每个epoch的第一个batch保存训练数据，分析数据增强后的图像是否满足要求
+                if save_train_data:
+                    save_train_data = False
+                    train_image = data['image']
+                    #bbox        = data['gt_bbox'].numpy()
+                    train_image = train_image.numpy().transpose((0, 2, 3, 1))
+                    save_image  = np.zeros((train_image.shape[1], train_image.shape[2]*train_image.shape[0], train_image.shape[3]), dtype=np.uint8)
+                    save_image  = save_image.astype(np.uint8)
+                    for i in range(len(train_image)):
+                        image = (train_image[i] * 255).astype(np.uint8)
+                        #bboxs = bbox[i]
+                        #if bboxs.ndim >= 1:
+                        #    for bbox in bboxs:
+                        #        x1, y1, x2, y2 = bbox.astype(np.uint8)  # 将 bbox 转换为 uint8 类型
+                                #image = cv2.rectangle(image, (x1, y1), (x2, y2), (0, 255, 0), 2)
+                        save_image[:, i*train_image.shape[2]:(i+1)*train_image.shape[2], :] = image
+                    out_dir = os.path.dirname(self.cfg.get('weights', None))
+                    os.makedirs(out_dir, exist_ok=True)
+                    cv2.imwrite(os.path.join(out_dir, 'train_image_{:03d}.tif'.format(epoch_id)), save_image)
+                    
                 if self.cfg.architecture in [
                         'YOLOv5', 'YOLOv6', 'YOLOv7', 'YOLOv8'
                 ]:
@@ -903,12 +930,8 @@ class Trainer(object):
                     outs[key] = value.numpy()
             results.append(outs)
 
-        for _m in metrics:
-            _m.accumulate()
-            _m.reset()
-
-        if visualize:
-            for outs in results:
+            # visualize
+            if visualize:
                 batch_res = get_infer_results(outs, clsid2catid)
                 bbox_num = outs['bbox_num']
 
@@ -941,9 +964,14 @@ class Trainer(object):
                                                           image_path)
                     logger.info("Detection bbox results save in {}".format(
                         save_name))
-                    image.save(save_name, quality=95)
+                    image.save(save_name)
 
                     start = end
+
+        for _m in metrics:
+            _m.accumulate()
+            _m.reset()
+
         return results
 
     def _get_save_image_name(self, output_dir, image_path):

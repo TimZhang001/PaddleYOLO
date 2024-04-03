@@ -6,12 +6,12 @@ eval_size: &eval_size [*eval_height, *eval_width]
 TrainReader:
   sample_transforms:
     - Decode: {}
-    - RandomDistort: {}
-    - RandomExpand: {fill_value: [123.675, 116.28, 103.53]}
-    - RandomCrop: {}
-    - RandomFlip: {}
+    - RandomDistort: {}  # 随机颜色失真，可选的OP
+    - RandomExpand: {ratio: 1.25, fill_value: [123.675, 116.28, 103.53]} # 随机Canvas填充，可选的OP 
+    - RandomCrop: {}  # 随机裁剪，可选的OP
+    - RandomFlip: {}  # 随机左右翻转，默认概率0.5，可选的OP
   batch_transforms:
-    - BatchRandomResize: {target_size: [416, 448, 480, 512, 544, 576, 608, 640], random_size: True, random_interp: True, keep_ratio: False}
+    - BatchRandomResize: {target_size: [416, 448, 480, 512, 544, 576, 608, 640], random_size: True, random_interp: True, keep_ratio: True}
     - NormalizeImage: {mean: [0., 0., 0.], std: [1., 1., 1.], norm_type: none}
     - Permute: {}
     - PadGT: {}
@@ -20,6 +20,7 @@ TrainReader:
   drop_last: true
   use_shared_memory: true
   collate_batch: true
+  allow_empty: true
 
 EvalReader:
   sample_transforms:
@@ -27,7 +28,7 @@ EvalReader:
     - Resize: {target_size: *eval_size, keep_ratio: False, interp: 2}
     - NormalizeImage: {mean: [0., 0., 0.], std: [1., 1., 1.], norm_type: none}
     - Permute: {}
-  batch_size: 2
+  batch_size: 4
 
 TestReader:
   inputs_def:

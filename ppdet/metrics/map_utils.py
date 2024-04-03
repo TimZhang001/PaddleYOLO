@@ -37,6 +37,7 @@ __all__ = [
 
 def draw_pr_curve(precision,
                   recall,
+                  threshold,
                   iou=0.5,
                   out_dir='pr_curve',
                   class_name=None):
@@ -57,19 +58,19 @@ def draw_pr_curve(precision,
 
     file_name   = '{}_miss_overkill_curve.jpg'.format(class_name)
     output_path = os.path.join(out_dir, file_name)  
-    var_length  = len(precision)
-    threshold   = np.arange(0, 1, 1.0 / var_length)
+    miss        = [1 - x for x in recall]
+    overkill    = [1 - x for x in precision]
     plt.figure(dpi=200)
     plt.title('miss/overkill Curve(IoU={})'.format(iou))
     plt.xlabel('miss_overkill')
     plt.ylabel('threshold')
     plt.grid(True)
-    plt.plot(threshold, precision, label='precision')
-    plt.plot(threshold, recall,    label='recall')
+    plt.plot(threshold, miss,     label='miss')
+    plt.plot(threshold, overkill, label='overkill')
+    plt.legend()
     plt.show()
     plt.savefig(output_path)
     plt.close()
-
 
 def bbox_area(bbox, is_bbox_normalized):
     """
@@ -217,7 +218,7 @@ class DetectionMAP(object):
                 valid_cnt += 1
                 continue
 
-            accum_tp_list, accum_fp_list = self._get_tp_fp_accum(score_pos)
+            accum_tp_list, accum_fp_list, score_list = self._get_tp_fp_accum(score_pos)
             precision = []
             recall = []
             for ac_tp, ac_fp in zip(accum_tp_list, accum_fp_list):
@@ -254,11 +255,13 @@ class DetectionMAP(object):
             else:
                 logger.error("Unspported mAP type {}".format(self.map_type))
                 sys.exit(1)
+            
             eval_results.append({
                 'class': self.classes[valid_cnt - 1],
                 'ap': one_class_ap,
                 'precision': precision,
                 'recall': recall,
+                'score': score_list,
             })
         self.eval_results = eval_results
         self.mAP = mAP / float(valid_cnt) if valid_cnt > 0 else mAP
@@ -286,7 +289,8 @@ class DetectionMAP(object):
                 epoch_id = epoch_id if epoch_id else 0
                 draw_pr_curve(eval_result['precision'],
                               eval_result['recall'],
-                              out_dir=os.path.join(out_dir, 'epoch_{}'.format(epoch_id)),
+                              eval_result['score'],
+                              out_dir=os.path.join(out_dir, 'epoch_{:03d}'.format(epoch_id)),
                               class_name=eval_result['class'])
 
             num_columns     = min(6, len(results_per_category) * 2)
@@ -312,9 +316,11 @@ class DetectionMAP(object):
         accum_fp = 0
         accum_tp_list = []
         accum_fp_list = []
+        score_list    = []
         for (score, pos) in sorted_list:
             accum_tp += int(pos)
             accum_tp_list.append(accum_tp)
             accum_fp += 1 - int(pos)
             accum_fp_list.append(accum_fp)
-        return accum_tp_list, accum_fp_list
+            score_list.append(score)
+        return accum_tp_list, accum_fp_list, score_list
