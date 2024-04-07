@@ -84,3 +84,92 @@ def _walk_voc_dir(devkit_dir, year, output_dir):
                 img_ann_list.append((img_path, ann_path))
 
     return trainval_list, test_list
+
+
+def bbox_iou(bbox_gt, bbox_pred):
+    """
+    Calculate the Intersection of Unions (IoUs) between bounding boxes.
+    Args:
+        bbox_gt (list): [x1, y1, x2, y2]
+        bbox_pred (list): [x1, y1, width, height]
+    Returns:
+        float: IoU
+    """
+    x1_gt, y1_gt, x2_gt, y2_gt = bbox_gt.tolist()[0]
+    x1_pred, y1_pred, w_pred, h_pred = bbox_pred
+
+    x2_pred = x1_gt + w_pred
+    y2_pred = y1_gt + h_pred
+
+    # get the overlap rectangle
+    x1 = max(x1_gt, x1_pred)
+    y1 = max(y1_gt, y1_pred)
+    x2 = min(x2_gt, x2_pred)
+    y2 = min(y2_gt, y2_pred)
+
+    # calculate the area of the overlap rectangle
+    w = max(0, x2 - x1)
+    h = max(0, y2 - y1)
+    inter = w * h
+
+    # calculate the area of both bboxes
+    area_gt   = (x2_gt   - x1_gt)   * (y2_gt   - y1_gt)
+    area_pred = (x2_pred - x1_pred) * (y2_pred - y1_pred)
+    iou       = inter / (area_gt + area_pred - inter)
+
+    return iou
+
+# 根据bboxs、class_ids和bbox_res，判断正常检测、过检测 、漏检测
+def cal_bboxs_iou(bboxs_gt, class_ids_gt, draw_thresh, bboxs_res):
+    """
+    Calculate iou between bboxs_gt and bboxs_res
+    """
+    
+    bboxs_gt_new = []
+    bboxs_gt_new.append({"bbox":bboxs_gt}) 
+    
+    # 在bboxs_res中找到阈值大于draw_thresh的bboxs
+    bboxs_res_new = []
+    for i, bbox_res in enumerate(bboxs_res):
+        if bbox_res['score'] < draw_thresh:
+            continue
+        bboxs_res_new.append(bbox_res)
+
+    
+    # 遍历bboxs_res_new，判断正常检测、过检测
+    overkill_flg = 0
+    for i, bbox_res in enumerate(bboxs_res_new):
+
+        # 类别相同，且iou大于0.5，正常检测
+        for j, bbox_gt in enumerate(bboxs_gt_new):
+            if class_ids_gt[j] != bbox_res['category_id']:
+                continue
+            iou = bbox_iou(bbox_gt['bbox'], bbox_res['bbox'])
+            if iou > 0.5:
+                bbox_res['status'] = 'normal'
+                break
+        
+        # 否则都是过检测
+        if 'status' not in bbox_res:
+            bbox_res['status'] = 'over'
+            overkill_flg = 1
+
+    # 遍历bboxs_gt，判断正常检测、判断漏检测
+    misskill_flg = 0
+    for i, bbox_gt in enumerate(bboxs_gt_new):
+
+        # 类别相同，且iou大于0.5，正常检测
+        for j, bbox_res in enumerate(bboxs_res_new):
+            if class_ids_gt[i] != bbox_res['category_id']:
+                continue
+            iou = bbox_iou(bbox_gt['bbox'], bbox_res['bbox'])
+            if iou > 0.5:
+                bbox_gt['status'] = 'normal'
+                break
+        
+        # 否则都是漏检测
+        if 'status' not in bbox_gt:
+            bbox_gt['status'] = 'over'
+            misskill_flg      = 2
+
+    return overkill_flg + misskill_flg

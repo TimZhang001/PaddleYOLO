@@ -62,15 +62,18 @@ def draw_pr_curve(precision,
     overkill    = [1 - x for x in precision]
     plt.figure(dpi=200)
     plt.title('miss/overkill Curve(IoU={})'.format(iou))
-    plt.xlabel('miss_overkill')
-    plt.ylabel('threshold')
+    plt.xlabel('threshold')
+    plt.ylabel('miss_overkill')
     plt.grid(True)
+    plt.yticks(np.arange(0, 1.05, 0.05))
+    plt.xticks(np.arange(0, 1.00, 0.10))
     plt.plot(threshold, miss,     label='miss')
     plt.plot(threshold, overkill, label='overkill')
     plt.legend()
     plt.show()
     plt.savefig(output_path)
     plt.close()
+
 
 def bbox_area(bbox, is_bbox_normalized):
     """

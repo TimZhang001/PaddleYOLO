@@ -45,6 +45,7 @@ from ppdet.data.source.category import get_categories
 import ppdet.utils.stats as stats
 from ppdet.utils.fuse_utils import fuse_conv_bn
 from ppdet.utils import profiler
+from ppdet.utils.voc_utils import cal_bboxs_iou
 from ppdet.modeling.initializer import reset_initialized_parameter
 from ppdet.modeling.post_process import multiclass_nms
 
@@ -381,17 +382,11 @@ class Trainer(object):
                 if save_train_data:
                     save_train_data = False
                     train_image = data['image']
-                    #bbox        = data['gt_bbox'].numpy()
                     train_image = train_image.numpy().transpose((0, 2, 3, 1))
                     save_image  = np.zeros((train_image.shape[1], train_image.shape[2]*train_image.shape[0], train_image.shape[3]), dtype=np.uint8)
                     save_image  = save_image.astype(np.uint8)
                     for i in range(len(train_image)):
                         image = (train_image[i] * 255).astype(np.uint8)
-                        #bboxs = bbox[i]
-                        #if bboxs.ndim >= 1:
-                        #    for bbox in bboxs:
-                        #        x1, y1, x2, y2 = bbox.astype(np.uint8)  # 将 bbox 转换为 uint8 类型
-                                #image = cv2.rectangle(image, (x1, y1), (x2, y2), (0, 255, 0), 2)
                         save_image[:, i*train_image.shape[2]:(i+1)*train_image.shape[2], :] = image
                     out_dir = os.path.dirname(self.cfg.get('weights', None))
                     os.makedirs(out_dir, exist_ok=True)
@@ -530,7 +525,8 @@ class Trainer(object):
 
         self._compose_callback.on_train_end(self.status)
 
-    def _eval_with_loader(self, loader, epoch_id=0):
+    def _eval_with_loader(self, loader, 
+                          epoch_id=0, visualize=False, draw_threshold=0.5, output_eval=None):
         sample_num = 0
         tic = time.time()
         self._compose_callback.on_epoch_begin(self.status)
@@ -564,12 +560,90 @@ class Trainer(object):
             for metric in self._metrics:
                 metric.update(data, outs)
 
+            for key in ['im_shape', 'scale_factor', 'im_id']:
+                if isinstance(data, typing.Sequence):
+                    outs[key] = data[0][key]
+                else:
+                    outs[key] = data[key]
+            for key, value in outs.items():
+                if hasattr(value, 'numpy'):
+                    outs[key] = value.numpy()
+
             # multi-scale inputs: all inputs have same im_id
             if isinstance(data, typing.Sequence):
                 sample_num += data[0]['im_id'].numpy().shape[0]
             else:
                 sample_num += data['im_id'].numpy().shape[0]
             self._compose_callback.on_step_end(self.status)
+
+            # 进行图像的保存
+            if visualize:
+                clsid2catid = self.dataset.cname2cid
+                batch_res   = get_infer_results(outs, list(clsid2catid.values()))
+                bbox_num    = outs['bbox_num']
+
+                start = 0
+                for i, im_id in enumerate(outs['im_id']):
+                    
+                    # image path
+                    data_im_id = int(im_id)
+                    image_path = self.dataset.roidbs[data_im_id]['im_file']
+                    
+                    # image data
+                    image = data['image'][int(im_id) % bbox_num.shape[0]]
+                    image = image.numpy().transpose((1, 2, 0)) * 255
+                    image = Image.fromarray(image.astype(np.uint8))
+                    image = ImageOps.exif_transpose(image)
+                    image_bk = image.copy()
+
+                    # ground truth
+                    bboxs     = data['gt_bbox'][int(im_id) % bbox_num.shape[0]].numpy()
+                    class_ids = data['gt_class'][int(im_id) % bbox_num.shape[0]].numpy()
+
+                    # detect result
+                    end          = start + bbox_num[i]
+                    bbox_res     = batch_res['bbox'][start:end] if 'bbox' in batch_res else None
+                    mask_res     = batch_res['mask'][start:end] if 'mask' in batch_res else None
+                    segm_res     = batch_res['segm'][start:end] if 'segm' in batch_res else None
+                    keypoint_res = batch_res['keypoint'][start:end] if 'keypoint' in batch_res else None
+                    pose3d_res   = batch_res['pose3d'][start:end] if 'pose3d' in batch_res else None
+                    start        = end
+                    
+                    # 根据bboxs、class_ids和bbox_res计算bbox_res的iou
+                    save_flg     = cal_bboxs_iou(bboxs, class_ids, draw_threshold, bbox_res)
+                    if save_flg == 0:
+                        continue
+                    
+                    # 预测结果的显示
+                    image_pred   = visualize_results(image, bbox_res, mask_res, segm_res, keypoint_res,
+                                                     pose3d_res, int(im_id), list(clsid2catid.keys()), draw_threshold)         
+                    
+                    # 真实结果的显示
+                    bbox_res_gt  = [] 
+                    for i in range(len(bboxs)):
+                        x1, y1, x2, y2 = bboxs[i]
+                        w, h = x2 - x1, y2 - y1
+                        class_id = int(class_ids[i])
+                        bbox_res_gt.append({"image_id":data_im_id, "category_id": class_id, "bbox":[x1, y1, w, h], "score":1.0})
+                    image_gt     = visualize_results(image_bk, bbox_res_gt, mask_res, segm_res, keypoint_res,
+                                                     pose3d_res, int(im_id), list(clsid2catid.keys()), draw_threshold)
+                    
+                    # 真实结果和预测结果的拼接
+                    image_save = Image.new('RGB', (image_gt.width + image_pred.width, image_gt.height))
+                    image_save.paste(image_gt, (0, 0))
+                    image_save.paste(image_pred, (image_gt.width, 0))
+                    
+                    # save image with detection
+                    if save_flg == 1:
+                        cur_output_eval = os.path.join(output_eval, 'over')
+                    elif save_flg == 2:
+                        cur_output_eval = os.path.join(output_eval, 'miss')
+                    else:
+                        cur_output_eval = os.path.join(output_eval, 'over_miss')                    
+                    os.makedirs(cur_output_eval, exist_ok=True)
+                    save_name = self._get_save_image_name(cur_output_eval, image_path)
+                    logger.info("Detection bbox results save in {}".format(save_name))
+                    image_save.save(save_name)
 
         self.status['sample_num'] = sample_num
         self.status['cost_time'] = time.time() - tic
@@ -582,7 +656,7 @@ class Trainer(object):
         # reset metric states for metric may performed multiple times
         self._reset_metrics()
 
-    def evaluate(self):
+    def evaluate(self, draw_threshold, output_eval):
         # get distributed model
         if self.cfg.get('fleet', False):
             self.model = fleet.distributed_model(self.model)
@@ -593,7 +667,10 @@ class Trainer(object):
             self.model = paddle.DataParallel(
                 self.model, find_unused_parameters=find_unused_parameters)
         with paddle.no_grad():
-            self._eval_with_loader(self.loader, epoch_id=9999)
+            self._eval_with_loader(self.loader, 
+                                   epoch_id=9999, visualize=True, 
+                                   draw_threshold = draw_threshold,
+                                   output_eval=output_eval)
 
     def _eval_with_loader_slice(self,
                                 loader,
@@ -746,8 +823,7 @@ class Trainer(object):
             metrics = []
 
         anno_file = self.dataset.get_anno()
-        clsid2catid, catid2name = get_categories(
-            self.cfg.metric, anno_file=anno_file)
+        clsid2catid, catid2name = get_categories(self.cfg.metric, anno_file=anno_file)
 
         # Run Infer 
         self.status['mode'] = 'test'

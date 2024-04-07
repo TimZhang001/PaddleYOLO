@@ -44,7 +44,7 @@ def parse_args():
     parser = ArgsParser()
     parser.add_argument(
         "--output_eval",
-        default=None,
+        default="output_eval",
         type=str,
         help="Evaluation directory, default is current directory.")
 
@@ -90,6 +90,11 @@ def parse_args():
         action='store_true',
         help="Whether to slice the image and merge the inference results for small object detection."
     )
+    parser.add_argument(
+        "--draw_threshold",
+        type=float,
+        default=0.40,
+        help="Threshold to reserve the result for visualization.")
     parser.add_argument(
         '--slice_size',
         nargs='+',
@@ -137,6 +142,8 @@ def run(FLAGS, cfg):
     # init parallel environment if nranks > 1
     init_parallel_env()
 
+    output_eval = os.path.join(os.path.dirname(cfg['weights']), FLAGS.output_eval)
+
     # build trainer
     trainer = Trainer(cfg, mode='eval')
 
@@ -152,7 +159,7 @@ def run(FLAGS, cfg):
             match_threshold=FLAGS.match_threshold,
             match_metric=FLAGS.match_metric)
     else:
-        trainer.evaluate()
+        trainer.evaluate(FLAGS.draw_threshold, output_eval)
 
 
 def main():
@@ -160,6 +167,9 @@ def main():
     cfg = load_config(FLAGS.config)
     merge_args(cfg, FLAGS)
     merge_config(FLAGS.opt)
+
+    if 'draw_threshold' in cfg:
+        FLAGS.draw_threshold = cfg["draw_threshold"]
 
     # disable npu in config by default
     if 'use_npu' not in cfg:

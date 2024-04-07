@@ -1165,6 +1165,40 @@ class RandomFlip(BaseOperator):
             sample['image'] = im
         return sample
 
+@register_op
+class RandomDeMorie(BaseOperator):
+    def __init__(self, prob=0.5):
+        """
+        Args:
+            prob (float): the probability of smooth image
+        """
+        super(RandomDeMorie, self).__init__()
+        self.prob  = prob
+        if not (isinstance(self.prob, float)):
+            raise TypeError("{}: input type is invalid.".format(self))
+
+    def apply_image(self, image, kernel_size=5):
+        filter_kernel = np.ones((kernel_size, kernel_size), np.float32) / (kernel_size * kernel_size)
+        image         = cv2.filter2D(image, -1, filter_kernel) 
+        return image
+
+    def apply(self, sample, context=None):
+        """Filp the image and bounding box.
+        Operators:
+            1. Flip the image numpy.
+            2. Get random kernel size
+            3. Smooth image with kernel size
+        Output:
+            sample: the image, bounding box and segmentation part
+                    in sample are flipped.
+        """
+        if np.random.uniform(0, 1) < self.prob:
+            im          = sample['image']
+            kernel_list = [3, 5, 7]  
+            kernel_size = np.random.choice(kernel_list, 1)[0]
+            sample['image'] = self.apply_image(im, kernel_size)
+        return sample
+
 
 @register_op
 class Resize(BaseOperator):

@@ -60,7 +60,7 @@ def parse_args():
     parser.add_argument(
         "--draw_threshold",
         type=float,
-        default=0.01,
+        default=0.5,
         help="Threshold to reserve the result for visualization.")
     parser.add_argument(
         "--slim_config",
@@ -191,6 +191,8 @@ def main():
     FLAGS = parse_args()
     cfg = load_config(FLAGS.config)
     FLAGS.output_dir = os.path.join(os.path.dirname(cfg['weights']), FLAGS.output_dir)
+    if 'draw_threshold' in cfg:
+        FLAGS.draw_threshold = cfg["draw_threshold"]
     merge_args(cfg, FLAGS)
     merge_config(FLAGS.opt)
 

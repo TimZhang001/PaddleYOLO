@@ -7,7 +7,7 @@ log_dir=log_dir/${job_name}
 #weights=output/${job_name}/model_final.pdparams
 
 # 1.训练（单卡/多卡），加 --eval 表示边训边评估，加 --amp 表示混合精度训练
-CUDA_VISIBLE_DEVICES=1 python tools/train.py -c ${config} --eval --amp --vdl_log_dir vdl_log_dir/${job_name}
+CUDA_VISIBLE_DEVICES=4 python tools/train.py -c ${config} --eval --amp --vdl_log_dir vdl_log_dir/${job_name}
 #python -m paddle.distributed.launch --log_dir=${log_dir} --gpus 4,5,6,7 tools/train.py -c ${config} --eval
 
 # 2.评估，加 --classwise 表示输出每一类mAP

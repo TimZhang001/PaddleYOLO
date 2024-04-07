@@ -10,6 +10,8 @@ log_iter: 200
 snapshot_epoch: 4
 weights: output/ppyoloe_plus_crn_m_80e_coco/model_final
 classwise: True
+#draw_threshold: {Blob: 0.7, Ring: 0.6, Zara: 0.8, Twill: 0.7, HShort: 0.6, VShort: 0.8, Dirty: 0.8, 
+#                HLine: 0.6, VLine: 0.8, HBlock: 0.8, VBlock: 0.6, HSplit: 0.8, VSplit: 0.8}
 
 pretrain_weights: https://bj.bcebos.com/v1/paddledet/models/pretrained/ppyoloe_crn_m_obj365_pretrained.pdparams
 depth_mult: 0.67

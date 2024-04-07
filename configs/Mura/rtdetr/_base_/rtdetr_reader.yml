@@ -2,17 +2,17 @@ worker_num: 4
 TrainReader:
   sample_transforms:
     - Decode: {}
-    - RandomDistort: {prob: 0.8}
-    - RandomExpand: {ratio: 1.25, fill_value: [123.675, 116.28, 103.53]} # 随机Canvas填充，可选的OP
-    - RandomCrop: {prob: 0.8}
-    - RandomFlip: {}
+    - RandomDistort: {hue: [-5, 5, 0.5], saturation: [0.85, 1.25, 0.5], contrast: [0.85, 1.25, 0.5], brightness: [0.85, 1.25, 0.5], count: 2}  # 随机颜色失真，可选的OP
+    - RandomExpand: {ratio: 1.15, fill_value: [123.675, 116.28, 103.53]} # 随机Canvas填充，可选的OP 
+    - RandomDeMorie: {prob: 0.75}
+    - RandomFlip: {}  # 随机左右翻转，默认概率0.5，可选的OP
   batch_transforms:
-    - BatchRandomResize: {target_size: [480, 512, 544, 576, 608, 640, 640, 640], random_size: True, random_interp: True, keep_ratio: False}
+    - BatchRandomResize: {target_size: [480, 512, 544, 576, 608, 640], random_size: True, random_interp: True, keep_ratio: False}
     - NormalizeImage: {mean: [0., 0., 0.], std: [1., 1., 1.], norm_type: none}
     - NormalizeBox: {}
     - BboxXYXY2XYWH: {}
     - Permute: {}
-  batch_size: 4
+  batch_size: 16
   shuffle: true
   drop_last: true
   collate_batch: false
@@ -23,9 +23,10 @@ EvalReader:
   sample_transforms:
     - Decode: {}
     - Resize: {target_size: [512, 512], keep_ratio: False, interp: 2}
+    - Pad: {size: *input_size, fill_value: [114., 114., 114.]}
     - NormalizeImage: {mean: [0., 0., 0.], std: [1., 1., 1.], norm_type: none}
     - Permute: {}
-  batch_size: 4
+  batch_size: 8
 
 
 TestReader:
@@ -34,6 +35,7 @@ TestReader:
   sample_transforms:
     - Decode: {}
     - Resize: {target_size: [512, 512], keep_ratio: False, interp: 2}
+    - Pad: {size: *input_size, fill_value: [114., 114., 114.]}
     - NormalizeImage: {mean: [0., 0., 0.], std: [1., 1., 1.], norm_type: none}
     - Permute: {}
   batch_size: 1

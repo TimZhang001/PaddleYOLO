@@ -270,6 +270,7 @@ class VOCMetric(Metric):
     def accumulate(self):
         output = "bbox.json"
         if self.output_eval:
+            os.makedirs(self.output_eval, exist_ok=True)
             output = os.path.join(self.output_eval, output)
             with open(output, 'w') as f:
                 json.dump(self.results, f)

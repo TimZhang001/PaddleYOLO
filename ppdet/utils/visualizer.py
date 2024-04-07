@@ -67,7 +67,14 @@ def draw_mask(image, im_id, segms, threshold, alpha=0.7):
         if im_id != dt['image_id']:
             continue
         segm, score = dt['segmentation'], dt['score']
-        if score < threshold:
+
+        # 如果threshold是一个dict,且包含catid2name[catid]的key
+        if isinstance(threshold, dict):
+            cur_threshold = threshold.get("default", 0.5)
+        else:
+            cur_threshold = threshold
+
+        if score < cur_threshold:
             continue
         import pycocotools.mask as mask_util
         mask = mask_util.decode(segm) * 255
@@ -93,7 +100,14 @@ def draw_bbox(image, im_id, catid2name, bboxes, threshold):
         if im_id != dt['image_id']:
             continue
         catid, bbox, score = dt['category_id'], dt['bbox'], dt['score']
-        if score < threshold:
+        
+        # 如果threshold是一个dict,且包含catid2name[catid]的key
+        if isinstance(threshold, dict):
+            cur_threshold = threshold.get(catid2name.get(catid), 0.5)
+        else:
+            cur_threshold = threshold
+        
+        if score < cur_threshold:
             continue
 
         if catid not in catid2color:
@@ -142,7 +156,14 @@ def save_result(save_path, results, catid2name, threshold):
         if "bbox_res" in results:
             for dt in results["bbox_res"]:
                 catid, bbox, score = dt['category_id'], dt['bbox'], dt['score']
-                if score < threshold:
+                
+                # 如果threshold是一个dict,且包含catid2name[catid]的key
+                if isinstance(threshold, dict):
+                    cur_threshold = threshold.get(catid2name.get(catid), 0.5)
+                else:
+                    cur_threshold = threshold
+            
+                if score < cur_threshold:
                     continue
                 # each bbox result as a line
                 # for rbox: classname score x1 y1 x2 y2 x3 y3 x4 y4
@@ -179,7 +200,12 @@ def draw_segm(image,
         if im_id != dt['image_id']:
             continue
         segm, score, catid = dt['segmentation'], dt['score'], dt['category_id']
-        if score < threshold:
+        # 如果threshold是一个dict,且包含catid2name[catid]的key
+        if isinstance(threshold, dict):
+            cur_threshold = threshold.get(catid2name.get(catid), 0.5)
+        else:
+            cur_threshold = threshold
+        if score < cur_threshold:
             continue
         import pycocotools.mask as mask_util
         mask = mask_util.decode(segm) * 255

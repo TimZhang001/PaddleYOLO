@@ -9,8 +9,8 @@ weights="https://bj.bcebos.com/v1/paddledet/models/${job_name}.pdparams"
 #weights=output/${job_name}/model_final.pdparams
 
 # 1.训练（单卡/多卡），加 --eval 表示边训边评估，加 --amp 表示混合精度训练
-#CUDA_VISIBLE_DEVICES=0 python tools/train.py -c ${config} --eval --amp
-python -m paddle.distributed.launch --log_dir=${log_dir} --gpus 0,1,2,3,4,5,6,7 tools/train.py -c ${config} --eval --amp
+CUDA_VISIBLE_DEVICES=0 python tools/train.py -c ${config} --eval --amp
+#python -m paddle.distributed.launch --log_dir=${log_dir} --gpus 0,1,2,3,4,5,6,7 tools/train.py -c ${config} --eval --amp
 
 # 2.评估，加 --classwise 表示输出每一类mAP
 #CUDA_VISIBLE_DEVICES=0 python tools/eval.py -c ${config} -o weights=${weights} --classwise
