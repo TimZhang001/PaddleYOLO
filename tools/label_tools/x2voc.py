@@ -68,7 +68,7 @@ class LabelMe2VOC(X2VOC):
     def __init__(self):
         self.defect_info = {}
         self.comm_list   = ("Blob",  "Ring",  "Zara",   "Twill",   "HShort", "VShort", "Gap", "Dirty")
-        self.line_list   = ("HLine", "VLine", "HBlock", "VBlock",  "HSplit", "VSplit")
+        self.line_list   = ("HLine", "VLine", "HBlock", "VBlock",  "HSplit", "VSplit") #"MultiLine"
 
     # 解析缺陷信息
     def _parse_defect_info(self, shape, project_type):
@@ -89,19 +89,42 @@ class LabelMe2VOC(X2VOC):
             ymin = min(y)
             ymax = max(y)
         label = shape["label"]
-
-
-        # 对标签进行个性化修改
-        if project_type == "Commons" and label not in self.comm_list:
-            return None, None, None, None, None
-        elif project_type == "Lines" and label not in self.line_list:
-            return None, None, None, None, None
-        elif project_type == "Alls" and label not in self.comm_list + self.line_list:
-            if label == "Gap":
-                label = "Blob"
-            else:
+        
+        # 对标签进行个性化修改 多个类别
+        if 1:
+            if project_type == "Commons" and label not in self.comm_list:
                 return None, None, None, None, None
-            
+            elif project_type == "Lines" and label not in self.line_list:
+                return None, None, None, None, None
+            elif project_type == "Alls" and label not in self.comm_list + self.line_list:
+                #if label == "Gap":
+                #    label = "Blob"
+                #else:
+                return None, None, None, None, None
+        
+        # 对标签进行个性化修改 单个类别
+        if 0:
+            if project_type == "Commons":
+                if label not in self.comm_list:
+                    return None, None, None, None, None
+                else:
+                    label = "Common"
+            elif project_type == "Lines":
+                if label not in self.line_list:
+                    return None, None, None, None, None
+                else:
+                    label = "Line"
+            elif project_type == "Alls":
+                if label not in self.comm_list + self.line_list:
+                    if label == "Gap":
+                        label = "Blob"
+                    else:
+                        return None, None, None, None, None
+                elif label in self.comm_list:
+                    label = "Common"
+                elif label in self.line_list:
+                    label = "Line"
+
         return xmin, ymin, xmax, ymax, label
         
     # 绘制缺陷信息
@@ -257,15 +280,16 @@ class LabelMe2VOC(X2VOC):
             # 读取json文件 
             with open(json_file, mode="r", encoding=get_encoding(json_file)) as j:
                 json_info = json.load(j)
-                img_file = osp.join(image_dir, img_name)
-                im_data  = cv2.imread(img_file)
-                h, w, c  = im_data.shape
-                
+                           
                 if 'imageHeight' in json_info and 'imageWidth' in json_info:
-                    h1 = json_info["imageHeight"]
-                    w1 = json_info["imageWidth"]
-                    if h1 != h or w1 != w:
-                        print("The size of the image is not consistent with the json file: {}.".format(img_name))
+                    h = json_info["imageHeight"]
+                    w = json_info["imageWidth"]
+                    
+                    #img_file = osp.join(image_dir, img_name)
+                    #im_data   = cv2.imread(img_file)
+                    #h1, w1, c = im_data.shape
+                    #if h1 != h or w1 != w:
+                    #    print("The size of the image is not consistent with the json file: {}.".format(img_name))
                         
                 node_size  = xml_doc.createElement("size")
                 node_width = xml_doc.createElement("width")

@@ -610,7 +610,7 @@ class Trainer(object):
                     start        = end
                     
                     # 根据bboxs、class_ids和bbox_res计算bbox_res的iou
-                    save_flg     = cal_bboxs_iou(bboxs, class_ids, draw_threshold, bbox_res)
+                    save_flg     = cal_bboxs_iou(bboxs, class_ids, clsid2catid, draw_threshold, bbox_res)
                     if save_flg == 0:
                         continue
                     

@@ -1,7 +1,7 @@
 epoch: 500
 
 LearningRate:
-  base_lr: 0.01
+  base_lr: 0.025
   schedulers:
   - !YOLOv5LRDecay
     max_epochs: 500

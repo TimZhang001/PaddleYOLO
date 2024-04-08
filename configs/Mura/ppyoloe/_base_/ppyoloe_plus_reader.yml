@@ -6,7 +6,7 @@ eval_size: &eval_size [*eval_height, *eval_width]
 TrainReader:
   sample_transforms:
     - Decode: {}
-    - RandomDistort: {hue: [-5, 5, 0.5], saturation: [0.85, 1.25, 0.5], contrast: [0.85, 1.25, 0.5], brightness: [0.85, 1.25, 0.5], count: 2}  # 随机颜色失真，可选的OP
+    - RandomDistort: {hue: [-2.5, 2.5, 0.5], saturation: [0.90, 1.10, 0.5], contrast: [0.90, 1.10, 0.5], brightness: [0.90, 1.10, 0.5], count: 2}  # 随机颜色失真，可选的OP
     - RandomExpand: {ratio: 1.15, fill_value: [123.675, 116.28, 103.53]} # 随机Canvas填充，可选的OP 
     - RandomDeMorie: {prob: 0.75}
     - RandomFlip: {}  # 随机左右翻转，默认概率0.5，可选的OP

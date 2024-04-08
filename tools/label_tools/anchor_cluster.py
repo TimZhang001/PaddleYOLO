@@ -22,6 +22,8 @@ import sys
 parent_path = os.path.abspath(os.path.join(__file__, *(['..'] * 2)))
 sys.path.insert(0, parent_path)
 
+sys.path.append("/home/zhangss/PaddleKits/PaddleYOLO")
+
 from ppdet.utils.logger import setup_logger
 logger = setup_logger('ppdet.anchor_cluster')
 
@@ -32,7 +34,7 @@ from tqdm import tqdm
 from ppdet.utils.cli import ArgsParser
 from ppdet.utils.check import check_gpu, check_version, check_config
 from ppdet.core.workspace import load_config, merge_config
-
+from ppdet.core.workspace import create
 
 class BaseAnchorCluster(object):
     def __init__(self, n, cache_path, cache, verbose=True):
@@ -184,7 +186,7 @@ class YOLOv2AnchorCluster(BaseAnchorCluster):
 def main():
     parser = ArgsParser()
     parser.add_argument(
-        '--n', '-n', default=9, type=int, help='num of clusters')
+        '--n', '-n', default=6, type=int, help='num of clusters')
     parser.add_argument(
         '--iters',
         '-i',
@@ -218,11 +220,12 @@ def main():
     if 'use_gpu' not in cfg:
         cfg.use_gpu = False
     check_gpu(cfg.use_gpu)
+    
     # check if paddlepaddle version is satisfied
-    check_version('develop')
+    # check_version('develop')
 
     # get dataset
-    dataset = cfg['TrainDataset']
+    dataset = cfg['{}Dataset'.format("Train")] = create('{}Dataset'.format("Train"))()
     if FLAGS.size:
         if ',' in FLAGS.size:
             size = list(map(int, FLAGS.size.split(',')))

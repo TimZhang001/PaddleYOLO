@@ -1,5 +1,5 @@
-model_name=yolov8 # 可修改，如 yolov7
-job_name=yolov8_m_500e_coco # 可修改，如 yolov7_tiny_300e_coco
+model_name=ppyoloe # 可修改，如 yolov7
+job_name=ppyoloe_plus_crn_m_80e_coco # 可修改，如 yolov7_tiny_300e_coco
 project_name=Mura
 config=configs/${project_name}/${model_name}/${job_name}.yml
 log_dir=log_dir/${job_name}
@@ -7,7 +7,7 @@ log_dir=log_dir/${job_name}
 #weights=output/${job_name}/model_final.pdparams
 
 # 1.训练（单卡/多卡），加 --eval 表示边训边评估，加 --amp 表示混合精度训练
-CUDA_VISIBLE_DEVICES=5 python tools/train.py -c ${config} --eval --amp --vdl_log_dir vdl_log_dir/${job_name}
+CUDA_VISIBLE_DEVICES=1 python tools/train.py -c ${config} --eval --amp --vdl_log_dir vdl_log_dir/${job_name}
 #python -m paddle.distributed.launch --log_dir=${log_dir} --gpus 4,5,6,7 tools/train.py -c ${config} --eval
 
 # 2.评估，加 --classwise 表示输出每一类mAP

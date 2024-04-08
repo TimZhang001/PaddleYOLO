@@ -91,11 +91,6 @@ def parse_args():
         help="Whether to slice the image and merge the inference results for small object detection."
     )
     parser.add_argument(
-        "--draw_threshold",
-        type=float,
-        default=0.40,
-        help="Threshold to reserve the result for visualization.")
-    parser.add_argument(
         '--slice_size',
         nargs='+',
         type=int,
@@ -170,6 +165,8 @@ def main():
 
     if 'draw_threshold' in cfg:
         FLAGS.draw_threshold = cfg["draw_threshold"]
+    else:
+        FLAGS.draw_threshold = 0.5
 
     # disable npu in config by default
     if 'use_npu' not in cfg:

@@ -103,7 +103,7 @@ def draw_bbox(image, im_id, catid2name, bboxes, threshold):
         
         # 如果threshold是一个dict,且包含catid2name[catid]的key
         if isinstance(threshold, dict):
-            cur_threshold = threshold.get(catid2name.get(catid), 0.5)
+            cur_threshold = threshold.get(catid2name[catid], 0.5)
         else:
             cur_threshold = threshold
         
@@ -202,7 +202,7 @@ def draw_segm(image,
         segm, score, catid = dt['segmentation'], dt['score'], dt['category_id']
         # 如果threshold是一个dict,且包含catid2name[catid]的key
         if isinstance(threshold, dict):
-            cur_threshold = threshold.get(catid2name.get(catid), 0.5)
+            cur_threshold = threshold.get(catid2name[catid], 0.5)
         else:
             cur_threshold = threshold
         if score < cur_threshold:

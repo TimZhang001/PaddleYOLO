@@ -3,18 +3,17 @@ import os
 class Copy2Dataset():
     def __init__(self):
         self.comm_list      = ("Blob",  "Ring",  "Zara",   "Twill",   "HShort", "VShort", "Gap", "Dirty")
-        self.line_list      = ("HLine", "VLine", "HBlock", "VBlock",  "HSplit", "VSplit")
+        self.line_list      = ("HLine", "VLine", "HBlock", "VBlock",  "HSplit", "VSplit", "MultiLine")
         
         # 模拟数据集的路径
         self.sim_data_list  = ("MonoMuraGeneralDataSet_V1.0", \
-                               "MonoMuraGeneralDataSet_V1.1_20220930", \
-                               "MonoMuraGeneralDataSet_V1.1_20221010")
+                               "MonoMuraGeneralDataSet_V1.1_20221010",\
+                               "ColorGeneralDataSet_L10_V1.0_20240407", )
         
         # 真实数据集的路径
-        self.true_data_list = ("TrueMuraDefect_V1.0.0_20220907", \
-                               "TrueMuraDefect_V1.0.0_20220926", \
-                               "TrueMuraDefect_V1.0.0_20221203", \
-                               "TrueMuraDefect_V1.0.0_20221205")
+        self.true_data_list = ("TrueMuraDefect_V1.0.0_20220926", \
+                               "TrueMuraDefect_V1.0.1_20230616", \
+                               "TrueMuraDefect_V1.0.2_20240112")
         
         # 背景的类型
         self.back_data_list = ("ideal", "particle", "widthBorder_OLED", \
@@ -111,27 +110,23 @@ class Copy2Dataset():
                     if self.check_str_in_list(NAME, self.line_list):
                         self.copy_files_2_project(cur_file_sim_back, NAME, "Lines")
                 
-                    if file_back not in ["withDefect"]:
-                        self.copy_files_2_project(cur_file_sim_back, NAME, "Alls") 
+                    self.copy_files_2_project(cur_file_sim_back, NAME, "Alls") 
 
                     
         # -----------------真实数据集-------------------------------------------------------
         for file_true in self.true_data_list:
-            cur_file_true = os.path.join(self.dataset_path, file_true)
-            for file_back in self.back_data_list:
-                cur_file_true_back = os.path.join(cur_file_true, file_back)     
-                    
-                # 进行数据集的拷贝
-                data_list = self.get_dirs_list(cur_file_true_back)
-                for NAME in data_list:
-                    if self.check_str_in_list(NAME, self.comm_list):
-                        self.copy_files_2_project(cur_file_true_back, NAME, "Commons")
+            cur_file_true = os.path.join(self.dataset_path, file_true)   
+                
+            # 进行数据集的拷贝
+            data_list = self.get_dirs_list(cur_file_true)
+            for NAME in data_list:
+                if self.check_str_in_list(NAME, self.comm_list):
+                    self.copy_files_2_project(cur_file_true, NAME, "Commons")
 
-                    if self.check_str_in_list(NAME, self.line_list):
-                        self.copy_files_2_project(cur_file_true_back, NAME, "Lines")
-                    
-                    if file_back not in ["withDefect"]:
-                        self.copy_files_2_project(cur_file_true_back, NAME, "Alls") 
+                if self.check_str_in_list(NAME, self.line_list):
+                    self.copy_files_2_project(cur_file_true, NAME, "Lines")
+
+                self.copy_files_2_project(cur_file_true, NAME, "Alls") 
 
 
 if __name__ == "__main__":

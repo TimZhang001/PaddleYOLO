@@ -119,8 +119,14 @@ def bbox_iou(bbox_gt, bbox_pred):
 
     return iou
 
+def get_key_from_value(dictionary, target_value):
+    for key, value in dictionary.items():
+        if value == target_value:
+            return key
+    return None
+
 # 根据bboxs、class_ids和bbox_res，判断正常检测、过检测 、漏检测
-def cal_bboxs_iou(bboxs_gt, class_ids_gt, draw_thresh, bboxs_res):
+def cal_bboxs_iou(bboxs_gt, class_ids_gt, catid2name, draw_thresh, bboxs_res):
     """
     Calculate iou between bboxs_gt and bboxs_res
     """
@@ -131,7 +137,16 @@ def cal_bboxs_iou(bboxs_gt, class_ids_gt, draw_thresh, bboxs_res):
     # 在bboxs_res中找到阈值大于draw_thresh的bboxs
     bboxs_res_new = []
     for i, bbox_res in enumerate(bboxs_res):
-        if bbox_res['score'] < draw_thresh:
+        cur_class_id = int(bbox_res['category_id'])
+        
+        # 如果threshold是一个dict,且包含catid2name[catid]的key
+        if isinstance(draw_thresh, dict):
+            cur_key       = get_key_from_value(catid2name, cur_class_id)
+            cur_threshold = draw_thresh.get(cur_key, 0.5)
+        else:
+            cur_threshold = draw_thresh
+        
+        if bbox_res['score'] < cur_threshold:
             continue
         bboxs_res_new.append(bbox_res)
 
@@ -145,7 +160,7 @@ def cal_bboxs_iou(bboxs_gt, class_ids_gt, draw_thresh, bboxs_res):
             if class_ids_gt[j] != bbox_res['category_id']:
                 continue
             iou = bbox_iou(bbox_gt['bbox'], bbox_res['bbox'])
-            if iou > 0.5:
+            if iou >= 0.40:
                 bbox_res['status'] = 'normal'
                 break
         

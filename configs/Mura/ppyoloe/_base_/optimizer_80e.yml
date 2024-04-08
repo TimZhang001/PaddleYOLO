@@ -1,7 +1,7 @@
 epoch: 80
 
 LearningRate:
-  base_lr: 0.0025
+  base_lr: 0.0020
   schedulers:
     - name: CosineDecay
       max_epochs: 96
