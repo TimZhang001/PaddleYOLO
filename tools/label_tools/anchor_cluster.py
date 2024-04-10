@@ -171,9 +171,9 @@ class YOLOv2AnchorCluster(BaseAnchorCluster):
             # E step
             converged, assignments = self.kmeans_expectation(whs, centers,
                                                              assignments)
-            if converged:
-                logger.info('kmeans algorithm has converged')
-                break
+            #if converged:
+            #    logger.info('kmeans algorithm has converged')
+            #    break
             # M step
             centers = self.kmeans_maximizations(whs, centers, assignments)
             ious = self.metric(whs, centers)

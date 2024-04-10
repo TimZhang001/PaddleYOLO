@@ -25,6 +25,8 @@ import math
 import paddle
 from paddle.inference import Config
 from paddle.inference import create_predictor
+from PIL import Image
+from PIL import ImageFilter
 
 import sys
 # add deploy path of PaddleDetection to sys.path
@@ -33,7 +35,7 @@ sys.path.insert(0, parent_path)
 
 from benchmark_utils import PaddleInferBenchmark
 from preprocess import preprocess, Resize, NormalizeImage, Permute, Pad, decode_image
-from visualize import visualize_box_mask
+from visualize import visualize_box_mask, tim_open_image
 from utils import argsparser, Timer, get_current_memory_mb, multiclass_nms, coco_clsid2catid
 
 # Global dictionary
@@ -95,7 +97,8 @@ class Detector(object):
                  enable_mkldnn_bfloat16=False,
                  output_dir='output',
                  threshold=0.5,
-                 delete_shuffle_pass=False):
+                 delete_shuffle_pass=False,
+                 image_dir=None):
         self.pred_config = self.set_config(model_dir)
         self.predictor, self.config = load_predictor(
             model_dir,
@@ -118,6 +121,7 @@ class Detector(object):
         self.batch_size = batch_size
         self.output_dir = output_dir
         self.threshold = threshold
+        self.image_dir = image_dir
 
     def set_config(self, model_dir):
         return PredictConfig(model_dir)
@@ -227,7 +231,7 @@ class Detector(object):
 
     def get_timer(self):
         return self.det_times
-
+    
     def predict_image_slice(self,
                             img_list,
                             slice_size=[640, 640],
@@ -252,9 +256,11 @@ class Detector(object):
             raise e
         num_classes = len(self.pred_config.labels)
         for i in range(len(img_list)):
+            
             ori_image = img_list[i]
+            cur_image = tim_open_image(ori_image)
             slice_image_result = sahi.slicing.slice_image(
-                image=ori_image,
+                image=cur_image,
                 slice_height=slice_size[0],
                 slice_width=slice_size[1],
                 overlap_height_ratio=overlap_ratio[0],
@@ -263,9 +269,7 @@ class Detector(object):
             merged_bboxs = []
             print('slice to {} sub_samples.', sub_img_num)
 
-            batch_image_list = [
-                slice_image_result.images[_ind] for _ind in range(sub_img_num)
-            ]
+            batch_image_list = [slice_image_result.images[_ind] for _ind in range(sub_img_num)]
             if run_benchmark:
                 # preprocess
                 inputs = self.preprocess(batch_image_list)  # warmup
@@ -312,18 +316,18 @@ class Detector(object):
                 boxes_num = result['boxes_num'][_ind]
                 ed = st + boxes_num
                 shift_amount = slice_image_result.starting_pixels[_ind]
-                result['boxes'][st:ed][:, 2:4] = result['boxes'][
-                    st:ed][:, 2:4] + shift_amount
-                result['boxes'][st:ed][:, 4:6] = result['boxes'][
-                    st:ed][:, 4:6] + shift_amount
+                result['boxes'][st:ed][:, 2:4] = result['boxes'][st:ed][:, 2:4] + shift_amount
+                result['boxes'][st:ed][:, 4:6] = result['boxes'][st:ed][:, 4:6] + shift_amount
                 merged_bboxs.append(result['boxes'][st:ed])
                 st = ed
 
             merged_results = {'boxes': []}
-            if combine_method == 'nms':
-                final_boxes = multiclass_nms(
-                    np.concatenate(merged_bboxs), num_classes, match_threshold,
-                    match_metric)
+            if combine_method == 'nms':          
+                # 去除分数太小的框，避免NMS异常
+                total_bboxs = np.concatenate(merged_bboxs)
+                if total_bboxs.shape[0] > 1000:
+                    total_bboxs = total_bboxs[total_bboxs[:, 1] > 0.05]
+                final_boxes = multiclass_nms(total_bboxs, num_classes, match_threshold,match_metric)
                 merged_results['boxes'] = np.concatenate(final_boxes)
             elif combine_method == 'concat':
                 merged_results['boxes'] = np.concatenate(merged_bboxs)
@@ -331,8 +335,7 @@ class Detector(object):
                 raise ValueError(
                     "Now only support 'nms' or 'concat' to fuse detection results."
                 )
-            merged_results['boxes_num'] = np.array(
-                [len(merged_results['boxes'])], dtype=np.int32)
+            merged_results['boxes_num'] = np.array([len(merged_results['boxes'])], dtype=np.int32)
 
             if visual:
                 visualize(
@@ -340,6 +343,7 @@ class Detector(object):
                     merged_results,
                     self.pred_config.labels,
                     output_dir=self.output_dir,
+                    image_dir=self.image_dir,
                     threshold=self.threshold)
 
             results.append(merged_results)
@@ -348,8 +352,7 @@ class Detector(object):
         results = self.merge_batch_result(results)
         if save_results:
             Path(self.output_dir).mkdir(exist_ok=True)
-            self.save_coco_results(
-                img_list, results, use_coco_category=FLAGS.use_coco_category)
+            self.save_coco_results(img_list, results, use_coco_category=FLAGS.use_coco_category)
         return results
 
     def predict_image(self,
@@ -362,7 +365,7 @@ class Detector(object):
         results = []
         for i in range(batch_loop_cnt):
             start_index = i * self.batch_size
-            end_index = min((i + 1) * self.batch_size, len(image_list))
+            end_index   = min((i + 1) * self.batch_size, len(image_list))
             batch_image_list = image_list[start_index:end_index]
             if run_benchmark:
                 # preprocess
@@ -417,8 +420,7 @@ class Detector(object):
         results = self.merge_batch_result(results)
         if save_results:
             Path(self.output_dir).mkdir(exist_ok=True)
-            self.save_coco_results(
-                image_list, results, use_coco_category=FLAGS.use_coco_category)
+            self.save_coco_results(image_list, results, use_coco_category=FLAGS.use_coco_category)
         return results
 
     def predict_video(self, video_file, camera_id):
@@ -756,12 +758,15 @@ def get_test_images(infer_dir, infer_img):
 
     images = set()
     infer_dir = os.path.abspath(infer_dir)
-    assert os.path.isdir(infer_dir), \
-        "infer_dir {} is not a directory".format(infer_dir)
-    exts = ['jpg', 'jpeg', 'png', 'bmp']
-    exts += [ext.upper() for ext in exts]
-    for ext in exts:
-        images.update(glob.glob('{}/*.{}'.format(infer_dir, ext)))
+    assert os.path.isdir(infer_dir), "infer_dir {} is not a directory".format(infer_dir)
+    
+    # 递归遍历的方式获取目录以及子目录下的所有图片
+    for root, dirs, files in os.walk(infer_dir):
+        for file in files:
+            if file.endswith(('.jpg', '.jpeg', '.png', '.bmp', '.tif')):
+                if "Main_" not in file:
+                    continue
+                images.add(os.path.join(root, file))
     images = list(images)
 
     assert len(images) > 0, "no image found in {}".format(infer_dir)
@@ -770,37 +775,35 @@ def get_test_images(infer_dir, infer_img):
     return images
 
 
-def visualize(image_list, result, labels, output_dir='output/', threshold=0.5):
+def visualize(image_list, result, labels, output_dir='output/', image_dir=None, threshold=0.5):
     # visualize the predict result
     start_idx = 0
     for idx, image_file in enumerate(image_list):
         im_bboxes_num = result['boxes_num'][idx]
         im_results = {}
         if 'boxes' in result:
-            im_results['boxes'] = result['boxes'][start_idx:start_idx +
-                                                  im_bboxes_num, :]
+            im_results['boxes'] = result['boxes'][start_idx:start_idx + im_bboxes_num, :]
         if 'masks' in result:
-            im_results['masks'] = result['masks'][start_idx:start_idx +
-                                                  im_bboxes_num, :]
+            im_results['masks'] = result['masks'][start_idx:start_idx + im_bboxes_num, :]
         if 'segm' in result:
-            im_results['segm'] = result['segm'][start_idx:start_idx +
-                                                im_bboxes_num, :]
+            im_results['segm'] = result['segm'][start_idx:start_idx + im_bboxes_num, :]
         if 'label' in result:
-            im_results['label'] = result['label'][start_idx:start_idx +
-                                                  im_bboxes_num]
+            im_results['label'] = result['label'][start_idx:start_idx + im_bboxes_num]
         if 'score' in result:
-            im_results['score'] = result['score'][start_idx:start_idx +
-                                                  im_bboxes_num]
+            im_results['score'] = result['score'][start_idx:start_idx + im_bboxes_num]
 
         start_idx += im_bboxes_num
-        im = visualize_box_mask(
-            image_file, im_results, labels, threshold=threshold)
-        img_name = os.path.split(image_file)[-1]
-        if not os.path.exists(output_dir):
-            os.makedirs(output_dir)
-        out_path = os.path.join(output_dir, img_name)
-        im.save(out_path, quality=95)
-        print("save result to: " + out_path)
+        im = visualize_box_mask(image_file, im_results, labels, threshold=threshold)
+        if image_dir is not None and image_dir in image_file:
+            save_file = image_file.replace(image_dir, output_dir)
+            base_path = os.path.split(save_file)[0]
+        else:
+            img_name = os.path.split(image_file)[-1]
+            base_path = output_dir
+            save_file = os.path.join(base_path, img_name)
+        os.makedirs(base_path, exist_ok=True)
+        im.save(save_file)
+        print("save result to: " + save_file)
 
 
 def print_arguments(args):
@@ -830,7 +833,8 @@ def main():
         enable_mkldnn=FLAGS.enable_mkldnn,
         enable_mkldnn_bfloat16=FLAGS.enable_mkldnn_bfloat16,
         threshold=FLAGS.threshold,
-        output_dir=FLAGS.output_dir)
+        output_dir=FLAGS.output_dir,
+        image_dir=FLAGS.image_dir)
 
     # predict from video file or camera video stream
     if FLAGS.video_file is not None or FLAGS.camera_id != -1:

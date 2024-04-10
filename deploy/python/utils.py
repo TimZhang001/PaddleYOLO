@@ -24,17 +24,23 @@ def argsparser():
     parser.add_argument(
         "--model_dir",
         type=str,
-        default=None,
+        default="/home/zhangss/PaddleKits/PaddleYOLO/output_inference/ppyoloe_plus_crn_s_80e_coco",
         help=("Directory include:'model.pdiparams', 'model.pdmodel', "
               "'infer_cfg.yml', created by tools/export_model.py."),
-        required=True)
+        required=False)
     parser.add_argument(
         "--image_file", type=str, default=None, help="Path of image file.")
     parser.add_argument(
         "--image_dir",
         type=str,
-        default=None,
+        # default="/raid/zhangss/dataset/Detection/Mura/ColorGeneralDataSet_L10_V1.0_20240407/ideal/Blob/image/", #
+        default="/raid/zhangss/dataset/Detection/Mura_test/",
         help="Dir of image file, `image_file` has a higher priority.")
+    parser.add_argument(
+        "--slice_infer",
+        action='store_true',
+        help="Whether to slice the image and merge the inference results for small object detection.",
+        default=True)
     parser.add_argument(
         "--batch_size", type=int, default=1, help="batch_size for inference.")
     parser.add_argument(
@@ -49,11 +55,11 @@ def argsparser():
         default=-1,
         help="device id of camera to predict.")
     parser.add_argument(
-        "--threshold", type=float, default=0.5, help="Threshold of score.")
+        "--threshold", type=float, default=0.30, help="Threshold of score.")
     parser.add_argument(
         "--output_dir",
         type=str,
-        default="output",
+        default="output/",
         help="Directory of output visualization files.")
     parser.add_argument(
         "--run_mode",
@@ -63,7 +69,7 @@ def argsparser():
     parser.add_argument(
         "--device",
         type=str,
-        default='cpu',
+        default='gpu',
         help="Choose the device you want to run, it can be: CPU/GPU/XPU/NPU, default is CPU."
     )
     parser.add_argument(
@@ -122,21 +128,16 @@ def argsparser():
         default=False,
         help='Whether to use the coco format dictionary `clsid2catid`')
     parser.add_argument(
-        "--slice_infer",
-        action='store_true',
-        help="Whether to slice the image and merge the inference results for small object detection."
-    )
-    parser.add_argument(
         '--slice_size',
         nargs='+',
         type=int,
-        default=[640, 640],
+        default=[512, 512],
         help="Height of the sliced image.")
     parser.add_argument(
         "--overlap_ratio",
         nargs='+',
         type=float,
-        default=[0.25, 0.25],
+        default=[0.05, 0.05],
         help="Overlap height ratio of the sliced image.")
     parser.add_argument(
         "--combine_method",

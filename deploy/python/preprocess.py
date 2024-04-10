@@ -15,7 +15,7 @@
 import cv2
 import numpy as np
 from PIL import Image
-
+from visualize import tim_open_image
 
 def decode_image(im_file, im_info):
     """read rgb image
@@ -27,11 +27,15 @@ def decode_image(im_file, im_info):
         im_info (dict): info of processed image
     """
     if isinstance(im_file, str):
+        '''
         with open(im_file, 'rb') as f:
             im_read = f.read()
         data = np.frombuffer(im_read, dtype='uint8')
         im = cv2.imdecode(data, 1)  # BGR mode, but need RGB mode
         im = cv2.cvtColor(im, cv2.COLOR_BGR2RGB)
+        '''  
+        im = tim_open_image(im_file)
+        im = np.array(im)
     else:
         im = im_file
     im_info['im_shape'] = np.array(im.shape[:2], dtype=np.float32)

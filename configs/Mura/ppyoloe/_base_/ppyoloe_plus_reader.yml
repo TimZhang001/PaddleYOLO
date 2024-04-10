@@ -20,12 +20,13 @@ TrainReader:
   drop_last: true
   use_shared_memory: true
   collate_batch: true
-  allow_empty: true
+  allow_empty: false
 
 EvalReader:
   sample_transforms:
     - Decode: {}
     - Resize: {target_size: *eval_size, keep_ratio: False, interp: 2}
+    - RandomDeMorie: {prob: 0.75}
     - NormalizeImage: {mean: [0., 0., 0.], std: [1., 1., 1.], norm_type: none}
     - Permute: {}
   batch_size: 8

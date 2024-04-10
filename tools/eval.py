@@ -143,7 +143,7 @@ def run(FLAGS, cfg):
     trainer = Trainer(cfg, mode='eval')
 
     # load weights
-    trainer.load_weights(cfg.weights)
+    trainer.load_weights(cfg.eval_weights)
 
     # training
     if FLAGS.slice_infer:

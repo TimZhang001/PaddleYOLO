@@ -17,7 +17,7 @@ class Copy2Dataset():
         
         # 背景的类型
         self.back_data_list = ("ideal", "particle", "widthBorder_OLED", \
-                               "withBorder_LCD", "withDefect", "withMorie")     
+                               "withBorder_LCD", "withBorder", "withHole", "withRC", "withDefect") # "withMorie" 
         
         # 数据集的根目录
         self.dataset_path   = "/raid/zhangss/dataset/Detection/Mura/"

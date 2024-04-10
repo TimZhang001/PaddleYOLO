@@ -64,7 +64,7 @@ def run(FLAGS, cfg):
     trainer = Trainer(cfg, mode='test')
 
     # load weights
-    trainer.load_weights(cfg.weights)
+    trainer.load_weights(cfg.eval_weights)
 
     # export model
     trainer.export(FLAGS.output_dir)

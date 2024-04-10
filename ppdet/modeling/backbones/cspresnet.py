@@ -297,8 +297,31 @@ class CSPResNet(nn.Layer):
         if use_checkpoint:
             paddle.seed(0)
 
+        self.normalize_in_model = 'no'
+        if self.normalize_in_model == 'yes':
+            # BCHW 1x3x1x1
+            mean = [0.0, 0.0, 0.0]
+            std  = [1.0, 1.0, 1.0]
+            mean = paddle.to_tensor(mean)
+            std  = paddle.to_tensor(std)
+            mean = paddle.unsqueeze(mean, axis=1)
+            mean = paddle.unsqueeze(mean, axis=2)
+            mean = paddle.unsqueeze(mean, axis=0)
+
+            std = paddle.unsqueeze(std, axis=1)
+            std = paddle.unsqueeze(std, axis=2)
+            std = paddle.unsqueeze(std, axis=0)
+
+            self.mean = mean
+            self.std  = std
+
     def forward(self, inputs):
-        x = inputs['image']
+        
+        if self.normalize_in_model == 'yes':
+            x = (inputs['image'] / 255.0 - self.mean) / self.std
+        else:
+            x = inputs['image']
+
         x = self.stem(x)
         outs = []
         for idx, stage in enumerate(self.stages):

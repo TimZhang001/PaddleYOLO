@@ -6,7 +6,7 @@ from label_tools.dataset_split.voc_split import split_voc_dataset
 if __name__ == "__main__":
     
     # 1. 将原始的数据集拷贝到指定的目录下，形成项目数据集
-    if 0:
+    if 1:
         copy2dataset = Copy2Dataset()
         copy2dataset.convert2dataset()
 
@@ -15,7 +15,7 @@ if __name__ == "__main__":
     project_path  = "/raid/zhangss/dataset/Detection/Mura_Project"
     project_types = ["Commons", "Lines", "Alls"]
 
-    if 0:
+    if 1:
         json2voc      = LabelMe2VOC()
         for project_type in project_types:
             image_dir = "{}/{}/02_JPEGImages".format(project_path, project_type)

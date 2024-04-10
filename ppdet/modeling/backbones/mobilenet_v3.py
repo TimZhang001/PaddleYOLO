@@ -447,12 +447,35 @@ class MobileNetV3(nn.Layer):
                 i += 1
                 self._update_out_channels(block_filter[1], i + 1, feature_maps)
 
+        self.normalize_in_model = 'no'
+        if self.normalize_in_model == 'yes':
+            # BCHW 1x3x1x1
+            mean = [0.0, 0.0, 0.0]
+            std  = [1.0, 1.0, 1.0]
+            mean = paddle.to_tensor(mean)
+            std  = paddle.to_tensor(std)
+            mean = paddle.unsqueeze(mean, axis=1)
+            mean = paddle.unsqueeze(mean, axis=2)
+            mean = paddle.unsqueeze(mean, axis=0)
+
+            std = paddle.unsqueeze(std, axis=1)
+            std = paddle.unsqueeze(std, axis=2)
+            std = paddle.unsqueeze(std, axis=0)
+
+            self.mean = mean
+            self.std  = std
+
     def _update_out_channels(self, channel, feature_idx, feature_maps):
         if feature_idx in feature_maps:
             self._out_channels.append(channel)
 
     def forward(self, inputs):
-        x = self.conv1(inputs['image'])
+        if self.normalize_in_model == 'yes':
+            x = (inputs['image'] / 255.0 - self.mean) / self.std
+        else:
+            x = inputs['image']
+        
+        x = self.conv1(x)
         outs = []
         for idx, block in enumerate(self.block_list):
             x = block(x)

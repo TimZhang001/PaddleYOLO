@@ -569,36 +569,27 @@ class Trainer(object):
                 if hasattr(value, 'numpy'):
                     outs[key] = value.numpy()
 
-            # multi-scale inputs: all inputs have same im_id
-            if isinstance(data, typing.Sequence):
-                sample_num += data[0]['im_id'].numpy().shape[0]
-            else:
-                sample_num += data['im_id'].numpy().shape[0]
-            self._compose_callback.on_step_end(self.status)
-
             # 进行图像的保存
             if visualize:
                 clsid2catid = self.dataset.cname2cid
                 batch_res   = get_infer_results(outs, list(clsid2catid.values()))
                 bbox_num    = outs['bbox_num']
-
-                start = 0
+                start       = 0
                 for i, im_id in enumerate(outs['im_id']):
                     
                     # image path
-                    data_im_id = int(im_id)
-                    image_path = self.dataset.roidbs[data_im_id]['im_file']
+                    image_path = self.dataset.roidbs[sample_num+i]['im_file']
                     
                     # image data
-                    image = data['image'][int(im_id) % bbox_num.shape[0]]
+                    image = data['image'][i]
                     image = image.numpy().transpose((1, 2, 0)) * 255
                     image = Image.fromarray(image.astype(np.uint8))
                     image = ImageOps.exif_transpose(image)
                     image_bk = image.copy()
 
                     # ground truth
-                    bboxs     = data['gt_bbox'][int(im_id) % bbox_num.shape[0]].numpy()
-                    class_ids = data['gt_class'][int(im_id) % bbox_num.shape[0]].numpy()
+                    bboxs     = data['gt_bbox'][i].numpy()
+                    class_ids = data['gt_class'][i].numpy()
 
                     # detect result
                     end          = start + bbox_num[i]
@@ -624,7 +615,7 @@ class Trainer(object):
                         x1, y1, x2, y2 = bboxs[i]
                         w, h = x2 - x1, y2 - y1
                         class_id = int(class_ids[i])
-                        bbox_res_gt.append({"image_id":data_im_id, "category_id": class_id, "bbox":[x1, y1, w, h], "score":1.0})
+                        bbox_res_gt.append({"image_id":int(im_id), "category_id": class_id, "bbox":[x1, y1, w, h], "score":1.0})
                     image_gt     = visualize_results(image_bk, bbox_res_gt, mask_res, segm_res, keypoint_res,
                                                      pose3d_res, int(im_id), list(clsid2catid.keys()), draw_threshold)
                     
@@ -645,8 +636,15 @@ class Trainer(object):
                     logger.info("Detection bbox results save in {}".format(save_name))
                     image_save.save(save_name)
 
+            # multi-scale inputs: all inputs have same im_id
+            if isinstance(data, typing.Sequence):
+                sample_num += data[0]['im_id'].numpy().shape[0]
+            else:
+                sample_num += data['im_id'].numpy().shape[0]
+            self._compose_callback.on_step_end(self.status)
+
         self.status['sample_num'] = sample_num
-        self.status['cost_time'] = time.time() - tic
+        self.status['cost_time']  = time.time() - tic
 
         # accumulate metric to log out
         for metric in self._metrics:
@@ -668,7 +666,7 @@ class Trainer(object):
                 self.model, find_unused_parameters=find_unused_parameters)
         with paddle.no_grad():
             self._eval_with_loader(self.loader, 
-                                   epoch_id=9999, visualize=True, 
+                                   epoch_id=9999, visualize=False, 
                                    draw_threshold = draw_threshold,
                                    output_eval=output_eval)
 

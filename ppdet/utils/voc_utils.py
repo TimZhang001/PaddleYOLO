@@ -95,7 +95,7 @@ def bbox_iou(bbox_gt, bbox_pred):
     Returns:
         float: IoU
     """
-    x1_gt, y1_gt, x2_gt, y2_gt = bbox_gt.tolist()[0]
+    x1_gt, y1_gt, x2_gt, y2_gt = bbox_gt
     x1_pred, y1_pred, w_pred, h_pred = bbox_pred
 
     x2_pred = x1_gt + w_pred
@@ -131,8 +131,11 @@ def cal_bboxs_iou(bboxs_gt, class_ids_gt, catid2name, draw_thresh, bboxs_res):
     Calculate iou between bboxs_gt and bboxs_res
     """
     
+    iou_thresh   = 0.30
+    bboxs_gt     = bboxs_gt.tolist()
     bboxs_gt_new = []
-    bboxs_gt_new.append({"bbox":bboxs_gt}) 
+    for bbox_gt in bboxs_gt:
+        bboxs_gt_new.append({"bbox":bbox_gt}) 
     
     # 在bboxs_res中找到阈值大于draw_thresh的bboxs
     bboxs_res_new = []
@@ -160,7 +163,7 @@ def cal_bboxs_iou(bboxs_gt, class_ids_gt, catid2name, draw_thresh, bboxs_res):
             if class_ids_gt[j] != bbox_res['category_id']:
                 continue
             iou = bbox_iou(bbox_gt['bbox'], bbox_res['bbox'])
-            if iou >= 0.40:
+            if iou >= iou_thresh:
                 bbox_res['status'] = 'normal'
                 break
         
@@ -178,7 +181,7 @@ def cal_bboxs_iou(bboxs_gt, class_ids_gt, catid2name, draw_thresh, bboxs_res):
             if class_ids_gt[i] != bbox_res['category_id']:
                 continue
             iou = bbox_iou(bbox_gt['bbox'], bbox_res['bbox'])
-            if iou > 0.5:
+            if iou >= iou_thresh:
                 bbox_gt['status'] = 'normal'
                 break
         
@@ -188,3 +191,14 @@ def cal_bboxs_iou(bboxs_gt, class_ids_gt, catid2name, draw_thresh, bboxs_res):
             misskill_flg      = 2
 
     return overkill_flg + misskill_flg
+
+
+def get_file_name_from_roidbs(roidbs, im_id):
+    im_file = None
+    for idx, roidb in enumerate(roidbs):
+        if roidb['im_id'] == im_id:
+            im_file = roidb['im_file']
+            if "Gap" in im_file and im_id != idx:
+                a = 1
+            break
+    return im_file

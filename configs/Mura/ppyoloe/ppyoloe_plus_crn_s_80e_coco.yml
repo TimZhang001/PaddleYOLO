@@ -9,8 +9,9 @@ _BASE_: [
 log_iter: 200
 snapshot_epoch: 4
 weights: output/ppyoloe_plus_crn_s_80e_coco/model_final
+eval_weights: output/ppyoloe_plus_crn_s_80e_coco/best_model
 classwise: True
-draw_threshold: {Blob: 0.5, Ring: 0.40, Zara: 0.50, Twill: 0.40, HShort: 0.18, VShort: 0.20, Dirty: 0.50, 
+draw_threshold: {Blob: 0.4, Ring: 0.40, Zara: 0.65, Twill: 0.40, HShort: 0.18, VShort: 0.20, Dirty: 0.50, Gap: 0.40, 
                 HLine: 0.6, VLine: 0.8, HBlock: 0.8, VBlock: 0.6, HSplit: 0.8, VSplit: 0.8}
   
 pretrain_weights: https://bj.bcebos.com/v1/paddledet/models/pretrained/ppyoloe_crn_s_obj365_pretrained.pdparams

@@ -36,12 +36,13 @@ def visualize_box_mask(im, results, labels, threshold=0.5):
         im (PIL.Image.Image): visualized image
     """
     if isinstance(im, str):
-        im = Image.open(im).convert('RGB')
+        #im = Image.open(im).convert('RGB')
+        im = tim_open_image(im)
+
     elif isinstance(im, np.ndarray):
         im = Image.fromarray(im)
     if 'masks' in results and 'boxes' in results and len(results['boxes']) > 0:
-        im = draw_mask(
-            im, results['boxes'], results['masks'], labels, threshold=threshold)
+        im = draw_mask(im, results['boxes'], results['masks'], labels, threshold=threshold)
     if 'boxes' in results and len(results['boxes']) > 0:
         im = draw_box(im, results['boxes'], labels, threshold=threshold)
     if 'segm' in results:
@@ -217,3 +218,64 @@ def draw_segm(im,
             1,
             lineType=cv2.LINE_AA)
     return Image.fromarray(im.astype('uint8'))
+
+
+def tim_open_image(ori_image_path):
+        
+    # PIL的方式打开image
+    cur_image = Image.open(ori_image_path).convert('RGB')
+
+    # 将图像转化为numpy数组
+    cur_image = np.array(cur_image)
+
+    # 进行3*3的均值滤波
+    smooth_image = cv2.blur(cur_image, (3, 3))
+
+    # RGB->lab
+    lab_image = cv2.cvtColor(smooth_image, cv2.COLOR_RGB2LAB)
+    L, A, B   = cv2.split(lab_image)
+    
+    # 基于L分量进行阈值分割
+    # 计算图像中心区域50*50的L分量均值 得到阈值
+    width, height = L.shape
+    if width > 512 and height > 512:
+        center_mean   = np.mean(L[width // 2 - 25: width // 2 + 25, height // 2 - 25: height // 2 + 25])
+        threshold     = 0.8 * center_mean
+        
+        # 阈值分割 二值化
+        binary_L      = np.zeros_like(L)
+        binary_L[L > threshold] = 255
+
+        # 二值化图像的膨胀操作
+        kernel        = cv2.getStructuringElement(cv2.MORPH_RECT, (11, 11))
+        dilate_L      = cv2.dilate(binary_L, kernel)
+
+        # 连通域提取, 找到面积最大的连通域，获取该连通域的外接矩形
+        _, labels, stats, centroids = cv2.connectedComponentsWithStats(dilate_L, connectivity=8)
+        max_label, max_num = 0, 0
+        for i in range(1, len(stats)):
+            if stats[i][4] > max_num:
+                max_num = stats[i][4]
+                max_label = i
+        x, y, w, h = stats[max_label][:4]
+
+        # 对原始图像进行crop操作
+        L = L[y: y + h, x: x + w]
+        A = A[y: y + h, x: x + w]
+        B = B[y: y + h, x: x + w]
+    
+    # L分量调整到均值127
+    avg_L     = np.mean(L)
+    scale_val = max(min(127.0 / avg_L, 2.5), 1.0)
+    add_val   = min(max(127 - avg_L * scale_val, 0), 50)
+    L         = L * scale_val + add_val
+    L         = L.astype(np.uint8)
+    lab_image = cv2.merge([L, A, B])
+
+    # lab->RGB
+    smooth_image = cv2.cvtColor(lab_image, cv2.COLOR_LAB2RGB)
+
+    # 将numpy数组转化为PIL格式
+    dst_image = Image.fromarray(smooth_image)
+
+    return dst_image
