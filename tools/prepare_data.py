@@ -2,21 +2,21 @@ from label_tools.copy2dataset import Copy2Dataset
 from label_tools.x2voc import LabelMe2VOC
 from label_tools.dataset_split.voc_split import split_voc_dataset
 
-
 if __name__ == "__main__":
     
+    project_path  = "/raid/zhangss/dataset/Detection/Mura_Project"
+    #project_types = ["Commons", "Lines", "Alls"]
+    project_types = ["Alls"]
+    target_size   = 1280 if "Total" in project_types else  512
+    
     # 1. 将原始的数据集拷贝到指定的目录下，形成项目数据集
-    if 1:
-        copy2dataset = Copy2Dataset()
-        copy2dataset.convert2dataset()
-
+    if 0:
+        copy2dataset = Copy2Dataset(project_path)
+        copy2dataset.convert2dataset(project_types)
 
     # 2. 将json文件转化为xml文件 ------------------------------------------------------   
-    project_path  = "/raid/zhangss/dataset/Detection/Mura_Project"
-    project_types = ["Commons", "Lines", "Alls"]
-
     if 1:
-        json2voc      = LabelMe2VOC()
+        json2voc      = LabelMe2VOC(target_size=target_size)
         for project_type in project_types:
             image_dir = "{}/{}/02_JPEGImages".format(project_path, project_type)
             json_dir  = "{}/{}/03_Labels/json".format(project_path, project_type)
@@ -30,8 +30,8 @@ if __name__ == "__main__":
     if 1:
         for project_type in project_types:
             dataset_dir  = "{}/{}".format(project_path, project_type)
-            val_value    = 0.1
-            test_value   = 0.1
+            val_value    = 0.15
+            test_value   = 0.0
             save_dir     = "{}/{}".format(project_path, project_type)
             split_voc_dataset(dataset_dir, val_value, test_value, save_dir)
             print("Split {} Done!".format(project_type))

@@ -65,14 +65,18 @@ class LabelMe2VOC(X2VOC):
     """将使用LabelMe标注的数据集转换为VOC数据集。
     """
 
-    def __init__(self):
+    def __init__(self, target_size=512):
         self.defect_info = {}
-        self.comm_list   = ("Blob",  "Ring",  "Zara",   "Twill",   "HShort", "VShort", "Gap", "Dirty")
+        self.comm_list   = ("Blob",  "Ring",  "Zara",   "Twill",   "HShort", "VShort", "Gap", "Dirty", "holeMura", "OK")
         self.line_list   = ("HLine", "VLine", "HBlock", "VBlock",  "HSplit", "VSplit") #"MultiLine"
+        self.target_size = target_size
 
     # 解析缺陷信息
     def _parse_defect_info(self, shape, project_type):
 
+        if len(shape) == 0:
+            return None, None, None, None, None
+        
         if 'shape_type' in shape:
             if shape["shape_type"] != "rectangle":
                 return None, None, None, None, None
@@ -91,16 +95,18 @@ class LabelMe2VOC(X2VOC):
         label = shape["label"]
         
         # 对标签进行个性化修改 多个类别
-        if 1:
+        if 0:
             if project_type == "Commons" and label not in self.comm_list:
                 return None, None, None, None, None
             elif project_type == "Lines" and label not in self.line_list:
                 return None, None, None, None, None
-            elif project_type == "Alls" and label not in self.comm_list + self.line_list:
-                #if label == "Gap":
-                #    label = "Blob"
-                #else:
-                return None, None, None, None, None
+            elif project_type == "Alls":
+                if label == "VBlock2":
+                    label = "VBlock"
+                if label == "HBlock1":
+                    label = "HBlock"
+                if label == "Blob":
+                    label = "Dirty"
         
         # 对标签进行个性化修改 单个类别
         if 0:
@@ -115,15 +121,7 @@ class LabelMe2VOC(X2VOC):
                 else:
                     label = "Line"
             elif project_type == "Alls":
-                if label not in self.comm_list + self.line_list:
-                    if label == "Gap":
-                        label = "Blob"
-                    else:
-                        return None, None, None, None, None
-                elif label in self.comm_list:
-                    label = "Common"
-                elif label in self.line_list:
-                    label = "Line"
+                label = "defect"
 
         return xmin, ymin, xmax, ymax, label
         
@@ -284,12 +282,20 @@ class LabelMe2VOC(X2VOC):
                 if 'imageHeight' in json_info and 'imageWidth' in json_info:
                     h = json_info["imageHeight"]
                     w = json_info["imageWidth"]
+
+                    if h != self.target_size or w != self.target_size:
+                        #print("The size of the image is not consistent with the target size: {}.".format(img_name))
                     
-                    #img_file = osp.join(image_dir, img_name)
-                    #im_data   = cv2.imread(img_file)
-                    #h1, w1, c = im_data.shape
-                    #if h1 != h or w1 != w:
-                    #    print("The size of the image is not consistent with the json file: {}.".format(img_name))
+                        img_file  = osp.join(image_dir, img_name)
+                        im_data   = cv2.imread(img_file)
+                        scale_x, scale_y = self.target_size / w, self.target_size / h
+                        im_data   = cv2.resize(im_data, [self.target_size,self.target_size])
+                        h, w      = self.target_size, self.target_size
+                        cv2.imwrite(img_file, im_data)
+                    else:
+                        scale_x, scale_y = 1.0, 1.0
+                else:
+                    assert "The imageHeight is not in the json file. {}".format(json_file)
                         
                 node_size  = xml_doc.createElement("size")
                 node_width = xml_doc.createElement("width")
@@ -309,6 +315,13 @@ class LabelMe2VOC(X2VOC):
                     xmin, ymin, xmax, ymax, label = self._parse_defect_info(shape, project_type)
                     if xmin is None:
                         continue
+                    
+                    # 进行scale的操作
+                    xmin = int(xmin * scale_x)
+                    ymin = int(ymin * scale_y)
+                    xmax = int(xmax * scale_x)
+                    ymax = int(ymax * scale_y)
+                    
                     node_obj  = xml_doc.createElement("object")
                     node_name = xml_doc.createElement("name")
                     node_name.appendChild(xml_doc.createTextNode(label))

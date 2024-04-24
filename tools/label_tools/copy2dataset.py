@@ -1,29 +1,35 @@
 import os
 
 class Copy2Dataset():
-    def __init__(self):
-        self.comm_list      = ("Blob",  "Ring",  "Zara",   "Twill",   "HShort", "VShort", "Gap", "Dirty")
-        self.line_list      = ("HLine", "VLine", "HBlock", "VBlock",  "HSplit", "VSplit", "MultiLine")
+    def __init__(self, project_path):
+        self.comm_list      = ("Blob",  "Ring",  "Zara",   "Twill",   "HShort", "VShort", "Gap", "Dirty", "holeMura", "OK")
+        self.line_list      = ("HLine", "VLine", "HBlock", "VBlock",  "HSplit", "VSplit", "MultiLine", "all")
         
         # 模拟数据集的路径
-        self.sim_data_list  = ("MonoMuraGeneralDataSet_V1.0", \
-                               "MonoMuraGeneralDataSet_V1.1_20221010",\
-                               "ColorGeneralDataSet_L10_V1.0_20240407", )
+        self.sim_data_list  = (#"MonoMuraGeneralDataSet_V1.0", \
+                               #"MonoMuraGeneralDataSet_V1.1_20221010",\
+                               #"ColorGeneralDataSet_L10_V1.0_20240407", \
+                               #"ColorGeneralDataSet_L128_V1.0_20240407",
+                               "ColorGeneralDataSet_Total_V1.0_20240407",
+                               )
         
         # 真实数据集的路径
-        self.true_data_list = ("TrueMuraDefect_V1.0.0_20220926", \
-                               "TrueMuraDefect_V1.0.1_20230616", \
-                               "TrueMuraDefect_V1.0.2_20240112")
+        self.true_data_list = (#"TrueMuraDefect_V1.0.0_20220926", \
+                               #"TrueMuraDefect_V1.0.1_20230616", \
+                               #"TrueMuraDefect_V1.0.2_20240112", \
+                               #"TrueMuraDefect_V1.0.4_20240411", \
+                               "TrueMuraDefect_V1.0.3_20240411",
+                               )
         
         # 背景的类型
-        self.back_data_list = ("ideal", "particle", "widthBorder_OLED", \
+        self.back_data_list = ("ideal", "particle", "widthBorder_OLED", "widthBorder", \
                                "withBorder_LCD", "withBorder", "withHole", "withRC", "withDefect") # "withMorie" 
         
         # 数据集的根目录
         self.dataset_path   = "/raid/zhangss/dataset/Detection/Mura/"
         
         # 项目路径
-        self.project_path   = "/raid/zhangss/dataset/Detection/Mura_Project/"
+        self.project_path   = project_path
 
     def get_dirs_list(self, path):
         """
@@ -80,7 +86,11 @@ class Copy2Dataset():
         if len(files_list) == 0:
             print("No image files in {}".format(cur_src_path))
         else:
-            os.system('cp {}/image/*.tif      {}/02_JPEGImages'.format(src_path,  dst_path))
+            if "tif" in files_list[0]:
+                os.system('cp {}/image/*.tif      {}/02_JPEGImages'.format(src_path,  dst_path))
+            
+            if "bmp" in files_list[0]:
+                os.system('cp {}/image/*.bmp      {}/02_JPEGImages'.format(src_path,  dst_path))
 
         # 拷贝json文件--------------------------------------------------------------------
         cur_src_path = os.path.join(src_path, "data")
@@ -90,43 +100,52 @@ class Copy2Dataset():
         else:
             os.system('cp {}/data/*.json      {}/03_Labels/json'.format(src_path, dst_path))
  
-    def convert2dataset(self):
+    def convert2dataset(self, project_types = ["Alls"]):
         
-        # 删除self.project_path目录下的所有文件夹和文件
-        os.system('rm -rf {}/*'.format(self.project_path))
+        for project_type in project_types:
+            
+            # 删除self.project_path目录下的所有文件夹和文件
+            cur_project_path = os.path.join(self.project_path, project_type)
+            os.system('rm -rf {}/*'.format(cur_project_path))
 
-        # -----------------模拟数据集-------------------------------------------------------    
-        for file_sim in self.sim_data_list:
-            cur_file_sim = os.path.join(self.dataset_path, file_sim)
-            for file_back in self.back_data_list:
-                cur_file_sim_back = os.path.join(cur_file_sim, file_back)     
+            # -----------------模拟数据集-------------------------------------------------------    
+            for file_sim in self.sim_data_list:
+                cur_file_sim = os.path.join(self.dataset_path, file_sim)
+                for file_back in self.back_data_list:
+                    cur_file_sim_back = os.path.join(cur_file_sim, file_back)     
+                        
+                    # 进行数据集的拷贝
+                    data_list = self.get_dirs_list(cur_file_sim_back)
+                    for NAME in data_list:
+                        if project_type == "Commons":
+                            if self.check_str_in_list(NAME, self.comm_list):
+                                self.copy_files_2_project(cur_file_sim_back, NAME, "Commons")
+
+                        if project_type == "Lines":
+                            if self.check_str_in_list(NAME, self.line_list):
+                                self.copy_files_2_project(cur_file_sim_back, NAME, "Lines")
+
+                        if project_type == "Alls":        
+                            self.copy_files_2_project(cur_file_sim_back, NAME, "Alls") 
+
+                        
+            # -----------------真实数据集-------------------------------------------------------
+            for file_true in self.true_data_list:
+                cur_file_true = os.path.join(self.dataset_path, file_true)   
                     
                 # 进行数据集的拷贝
-                data_list = self.get_dirs_list(cur_file_sim_back)
+                data_list = self.get_dirs_list(cur_file_true)
                 for NAME in data_list:
-                    if self.check_str_in_list(NAME, self.comm_list):
-                        self.copy_files_2_project(cur_file_sim_back, NAME, "Commons")
+                    if project_type == "Commons":
+                        if self.check_str_in_list(NAME, self.comm_list):
+                            self.copy_files_2_project(cur_file_true, NAME, "Commons")
 
-                    if self.check_str_in_list(NAME, self.line_list):
-                        self.copy_files_2_project(cur_file_sim_back, NAME, "Lines")
-                
-                    self.copy_files_2_project(cur_file_sim_back, NAME, "Alls") 
+                    if project_type == "Lines":
+                        if self.check_str_in_list(NAME, self.line_list):
+                            self.copy_files_2_project(cur_file_true, NAME, "Lines")
 
-                    
-        # -----------------真实数据集-------------------------------------------------------
-        for file_true in self.true_data_list:
-            cur_file_true = os.path.join(self.dataset_path, file_true)   
-                
-            # 进行数据集的拷贝
-            data_list = self.get_dirs_list(cur_file_true)
-            for NAME in data_list:
-                if self.check_str_in_list(NAME, self.comm_list):
-                    self.copy_files_2_project(cur_file_true, NAME, "Commons")
-
-                if self.check_str_in_list(NAME, self.line_list):
-                    self.copy_files_2_project(cur_file_true, NAME, "Lines")
-
-                self.copy_files_2_project(cur_file_true, NAME, "Alls") 
+                    if project_type == "Alls":        
+                        self.copy_files_2_project(cur_file_true, NAME, "Alls") 
 
 
 if __name__ == "__main__":

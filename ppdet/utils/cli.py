@@ -49,7 +49,8 @@ class ArgsParser(ArgumentParser):
             formatter_class=RawDescriptionHelpFormatter)
         # "configs/Mura/ppyoloe/ppyoloe_plus_crn_s_80e_coco.yml"
         # "configs/Mura/ppyolo/ppyolo_mbv3_large_coco.yml"
-        self.add_argument("-c", "--config", help="configuration file to use", default="configs/Mura/ppyolo/ppyolo_mbv3_large_coco.yml")
+        # "configs/Mura/ppyoloe_total/ppyoloe_plus_crn_m_80e_coco_total.yml"
+        self.add_argument("-c", "--config", help="configuration file to use", default="configs/Mura/ppyoloe/ppyoloe_plus_crn_s_80e_coco.yml")
         self.add_argument(
             "-o", "--opt", nargs='*', help="set configuration options")
 
