@@ -4,10 +4,10 @@ from label_tools.dataset_split.voc_split import split_voc_dataset
 
 if __name__ == "__main__":
     
-    project_path  = "/raid/zhangss/dataset/Detection/Mura_Project"
+    project_path  = "/raid/zhangss/dataset/Detection/Mura_Project" #Mura_Project_Total Mura_Project Mura_Project_AD
     #project_types = ["Commons", "Lines", "Alls"]
     project_types = ["Alls"]
-    target_size   = 1280 if "Total" in project_types else  512
+    target_size   = 1280 if "Total" in project_path  or "AD" in project_path else  512
     
     # 1. 将原始的数据集拷贝到指定的目录下，形成项目数据集
     if 0:

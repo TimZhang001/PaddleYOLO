@@ -11,7 +11,7 @@ TrainReader:
     - RandomDeMorie: {prob: 0.75}
     - RandomFlip: {}  # 随机左右翻转，默认概率0.5，可选的OP
   batch_transforms:
-    - BatchRandomResize: {target_size: [416, 448, 480, 512, 544, 576, 608, 640], random_size: True, random_interp: True, keep_ratio: False}
+    - BatchRandomResize: {target_size: [416, 448, 480, 512, 544, 576, 608, 640], random_size: True, random_interp: True, keep_ratio: True}
     - NormalizeImage: {mean: [0., 0., 0.], std: [1., 1., 1.], norm_type: none}
     - Permute: {}
     - PadGT: {}
@@ -20,7 +20,6 @@ TrainReader:
   drop_last: true
   use_shared_memory: true
   collate_batch: true
-  allow_empty: false
 
 EvalReader:
   sample_transforms:

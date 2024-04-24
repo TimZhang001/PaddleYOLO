@@ -1,5 +1,5 @@
 _BASE_: [
-  '../../datasets/voc_mura_all.yml',
+  '../../datasets/voc_mura_line.yml',
   '../../runtime.yml',
   '_base_/optimizer_6x.yml',
   '_base_/rtdetr_r50vd.yml',

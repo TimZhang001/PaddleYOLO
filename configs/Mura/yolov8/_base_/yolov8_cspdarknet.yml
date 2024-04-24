@@ -37,4 +37,4 @@ YOLOv8Head:
     nms_top_k: 3000
     keep_top_k: 300
     score_threshold: 0.001
-    nms_threshold: 0.7
+    nms_threshold: 0.4 #0.7

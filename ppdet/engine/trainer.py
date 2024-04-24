@@ -602,8 +602,8 @@ class Trainer(object):
                     
                     # 根据bboxs、class_ids和bbox_res计算bbox_res的iou
                     save_flg     = cal_bboxs_iou(bboxs, class_ids, clsid2catid, draw_threshold, bbox_res)
-                    if save_flg == 0:
-                        continue
+                    #if save_flg == 0:
+                    #    continue
                     
                     # 预测结果的显示
                     image_pred   = visualize_results(image, bbox_res, mask_res, segm_res, keypoint_res,
@@ -629,8 +629,10 @@ class Trainer(object):
                         cur_output_eval = os.path.join(output_eval, 'over')
                     elif save_flg == 2:
                         cur_output_eval = os.path.join(output_eval, 'miss')
+                    elif save_flg == 3:
+                        cur_output_eval = os.path.join(output_eval, 'over_miss')
                     else:
-                        cur_output_eval = os.path.join(output_eval, 'over_miss')                    
+                        cur_output_eval = os.path.join(output_eval, 'ok')
                     os.makedirs(cur_output_eval, exist_ok=True)
                     save_name = self._get_save_image_name(cur_output_eval, image_path)
                     logger.info("Detection bbox results save in {}".format(save_name))

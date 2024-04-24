@@ -12,7 +12,7 @@ TrainReader:
     - NormalizeBox: {}
     - BboxXYXY2XYWH: {}
     - Permute: {}
-  batch_size: 16
+  batch_size: 32
   shuffle: true
   drop_last: true
   collate_batch: false

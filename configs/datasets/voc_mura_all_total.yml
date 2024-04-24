@@ -1,0 +1,22 @@
+metric: VOC
+map_type: 11point
+num_classes: 8
+
+TrainDataset:
+  name: VOCDataSet
+  dataset_dir: /raid/zhangss/dataset/Detection/Mura_Project_Total/Alls/
+  anno_path: train.txt
+  label_list: label_list.txt
+  data_fields: ['image', 'gt_bbox', 'gt_class', 'difficult']
+  allow_empty: true
+  
+EvalDataset:
+  name: VOCDataSet
+  dataset_dir: /raid/zhangss/dataset/Detection/Mura_Project_Total/Alls/
+  anno_path: val.txt
+  label_list: label_list.txt
+  data_fields: ['image', 'gt_bbox', 'gt_class', 'difficult']
+
+TestDataset:
+  name: ImageFolder
+  anno_path: /raid/zhangss/dataset/Detection/Mura_Project_Total/Alls/label_list.txt

@@ -202,6 +202,8 @@ class VOCDataSet(DetDataset):
         if self.allow_empty and len(empty_records) > 0:
             empty_records = self._sample_empty(empty_records, len(records))
             records += empty_records
+            logger.info('There are {} empty records in file {}'.format(len(empty_records), self.anno_path))
+            print('There are {} empty records in file {}'.format(len(empty_records), self.anno_path))
         self.roidbs, self.cname2cid = records, cname2cid
 
     def get_label_list(self):

@@ -166,7 +166,7 @@ def main():
     if 'draw_threshold' in cfg:
         FLAGS.draw_threshold = cfg["draw_threshold"]
     else:
-        FLAGS.draw_threshold = 0.5
+        FLAGS.draw_threshold = 0.15
 
     # disable npu in config by default
     if 'use_npu' not in cfg:

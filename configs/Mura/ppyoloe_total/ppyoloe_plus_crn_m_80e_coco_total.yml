@@ -1,0 +1,17 @@
+_BASE_: [
+  '../../datasets/voc_mura_all_total.yml',
+  '../../runtime.yml',
+  './_base_/optimizer_80e.yml',
+  './_base_/ppyoloe_plus_crn.yml',
+  './_base_/ppyoloe_plus_reader.yml',
+]
+
+log_iter: 200
+snapshot_epoch: 4
+weights: output/ppyoloe_plus_crn_m_80e_coco_total/model_final
+eval_weights: output/ppyoloe_plus_crn_m_80e_coco_total/best_model
+classwise: True
+
+pretrain_weights: https://bj.bcebos.com/v1/paddledet/models/pretrained/ppyoloe_crn_m_obj365_pretrained.pdparams
+depth_mult: 0.67
+width_mult: 0.75

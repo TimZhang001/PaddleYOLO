@@ -1194,8 +1194,9 @@ class RandomDeMorie(BaseOperator):
         """
         if np.random.uniform(0, 1) < self.prob:
             im          = sample['image']
-            kernel_list = [3, 5]  #, 7 
-            kernel_size = np.random.choice(kernel_list, 1)[0]
+            #kernel_list = [3, 5]  #, 7 
+            #kernel_size = np.random.choice(kernel_list, 1)[0]
+            kernel_size  = 3
             sample['image'] = self.apply_image(im, kernel_size)
         return sample
 
