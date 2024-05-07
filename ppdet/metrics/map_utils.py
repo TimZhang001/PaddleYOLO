@@ -21,6 +21,8 @@ import os
 import sys
 import numpy as np
 import itertools
+import matplotlib
+matplotlib.use('tkagg') # Must be before importing matplotlib.pyplot or pylab!
 import matplotlib.pyplot as plt
 
 from ppdet.utils.logger import setup_logger
@@ -44,17 +46,18 @@ def draw_pr_curve(precision,
     if not os.path.exists(out_dir):
         os.makedirs(out_dir)
     
-    file_name   = '{}_precision_recall_curve.jpg'.format(class_name)
-    output_path = os.path.join(out_dir, file_name)  
-    plt.figure(dpi=200)
-    plt.title('Precision/Recall Curve(IoU={})'.format(iou))
-    plt.xlabel('Recall')
-    plt.ylabel('Precision')
-    plt.grid(True)
-    plt.plot(recall, precision)
-    plt.show()
-    plt.savefig(output_path)
-    plt.close()
+    if 0:
+        file_name   = '{}_precision_recall_curve.jpg'.format(class_name)
+        output_path = os.path.join(out_dir, file_name)  
+        plt.figure(dpi=200)
+        plt.title('Precision/Recall Curve(IoU={})'.format(iou))
+        plt.xlabel('Recall')
+        plt.ylabel('Precision')
+        plt.grid(True)
+        plt.plot(recall, precision)
+        #plt.show()
+        plt.savefig(output_path)
+        plt.close()
 
     file_name   = '{}_miss_overkill_curve.jpg'.format(class_name)
     output_path = os.path.join(out_dir, file_name)  
@@ -70,7 +73,7 @@ def draw_pr_curve(precision,
     plt.plot(threshold, miss,     label='miss')
     plt.plot(threshold, overkill, label='overkill')
     plt.legend()
-    plt.show()
+    #plt.show()
     plt.savefig(output_path)
     plt.close()
 

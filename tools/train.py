@@ -141,6 +141,7 @@ def run(FLAGS, cfg):
     if FLAGS.resume is not None:
         trainer.resume_weights(FLAGS.resume)
     elif 'pretrain_weights' in cfg and cfg.pretrain_weights:
+        print('load pretrain weights:', cfg.pretrain_weights)   
         trainer.load_weights(cfg.pretrain_weights)
 
     # training

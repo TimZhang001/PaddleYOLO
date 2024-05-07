@@ -1,0 +1,14 @@
+_BASE_: [
+  '../dataset/mura_com.yml',
+  '../runtime.yml',
+  '_base_/optimizer_6x.yml',
+  '_base_/rtdetr_r50vd.yml',
+  '_base_/rtdetr_reader.yml',
+]
+
+weights: output/rtdetr_r50vd_6x_coco/model_final
+save_dir: output/rtdetr_r18_6x_coco
+find_unused_parameters: True
+log_iter: 200
+#gpu_ids: 2
+classwise: True

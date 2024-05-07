@@ -61,7 +61,7 @@ __all__ = ['Trainer']
 
 
 class Trainer(object):
-    def __init__(self, cfg, mode='train'):
+    def __init__(self, cfg, mode='train', export_model=False):
         self.cfg = cfg.copy()
         assert mode.lower() in ['train', 'eval', 'test'], \
                 "mode should be 'train', 'eval' or 'test'"
@@ -134,10 +134,7 @@ class Trainer(object):
             self.loader = create(reader_name)(self.dataset, cfg.worker_num,
                                               self._eval_batch_sampler)
         # TestDataset build after user set images, skip loader creation here
-
-        
-        
-        
+   
         # get Params
         print_params = self.cfg.get('print_params', False)
         if print_params:

@@ -1,16 +1,17 @@
 import os
+from .defect_type import MuraCommList, MuraLineList, MuraAllList
 
 class Copy2Dataset():
     def __init__(self, project_path):
-        self.comm_list      = ("Blob",  "Ring",  "Zara",   "Twill",   "HShort", "VShort", "Gap", "Dirty", "holeMura", "OK")
-        self.line_list      = ("HLine", "VLine", "HBlock", "VBlock",  "HSplit", "VSplit", "MultiLine", "all")
+        self.comm_list      = MuraCommList
+        self.line_list      = MuraLineList
         
         # 模拟数据集的路径
         self.sim_data_list  = (#"MonoMuraGeneralDataSet_V1.0", \
                                #"MonoMuraGeneralDataSet_V1.1_20221010",\
                                #"ColorGeneralDataSet_L10_V1.0_20240407", \
                                #"ColorGeneralDataSet_L128_V1.0_20240407",
-                               "ColorGeneralDataSet_Total_V1.0_20240407",
+                               #"ColorGeneralDataSet_Total_V1.0_20240407",
                                )
         
         # 真实数据集的路径
@@ -18,7 +19,8 @@ class Copy2Dataset():
                                #"TrueMuraDefect_V1.0.1_20230616", \
                                #"TrueMuraDefect_V1.0.2_20240112", \
                                #"TrueMuraDefect_V1.0.4_20240411", \
-                               "TrueMuraDefect_V1.0.3_20240411",
+                               #"TrueMuraDefect_V1.0.3_20240411",
+                               "ColorMuraDefect_Project_V1.0.0_20240429",
                                )
         
         # 背景的类型
@@ -26,7 +28,7 @@ class Copy2Dataset():
                                "withBorder_LCD", "withBorder", "withHole", "withRC", "withDefect") # "withMorie" 
         
         # 数据集的根目录
-        self.dataset_path   = "/raid/zhangss/dataset/Detection/Mura/"
+        self.dataset_path   = "/raid/zhangss/dataset/Detection/Mura"
         
         # 项目路径
         self.project_path   = project_path
@@ -73,32 +75,32 @@ class Copy2Dataset():
         # 进行文件的拷贝
         
         # 拷贝annotation文件--------------------------------------------------------------------
-        cur_src_path = os.path.join(src_path, "annotation")
+        cur_src_path = os.path.join(src_path, "masks")
         files_list   = self.get_files_list(cur_src_path)
         if len(files_list) == 0:
             print("No annotation files in {}".format(cur_src_path))
         else:
-            os.system('cp {}/annotation/*.png {}/01_Annotations'.format(src_path, dst_path))
+            os.system('cp {}/masks/*.png {}/01_Annotations'.format(src_path, dst_path))
 
         # 拷贝image文件--------------------------------------------------------------------
-        cur_src_path = os.path.join(src_path, "image")
+        cur_src_path = os.path.join(src_path, "images")
         files_list   = self.get_files_list(cur_src_path)
         if len(files_list) == 0:
             print("No image files in {}".format(cur_src_path))
         else:
-            if "tif" in files_list[0]:
-                os.system('cp {}/image/*.tif      {}/02_JPEGImages'.format(src_path,  dst_path))
+            if "tif" in files_list[0] or 1:
+                os.system('cp {}/images/*.tif      {}/02_JPEGImages'.format(src_path,  dst_path))
             
-            if "bmp" in files_list[0]:
-                os.system('cp {}/image/*.bmp      {}/02_JPEGImages'.format(src_path,  dst_path))
+            if "bmp" in files_list[0] or 1:
+                os.system('cp {}/images/*.bmp      {}/02_JPEGImages'.format(src_path,  dst_path))
 
         # 拷贝json文件--------------------------------------------------------------------
-        cur_src_path = os.path.join(src_path, "data")
+        cur_src_path = os.path.join(src_path, "annotations")
         files_list   = self.get_files_list(cur_src_path)
         if len(files_list) == 0:
             print("No json files in {}".format(cur_src_path))
         else:
-            os.system('cp {}/data/*.json      {}/03_Labels/json'.format(src_path, dst_path))
+            os.system('cp {}/annotations/*.json      {}/03_Labels/json'.format(src_path, dst_path))
  
     def convert2dataset(self, project_types = ["Alls"]):
         

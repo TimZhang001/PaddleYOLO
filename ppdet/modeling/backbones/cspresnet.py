@@ -243,6 +243,7 @@ class CSPResNet(nn.Layer):
                  trt=False,
                  use_checkpoint=False,
                  use_alpha=False,
+                 export_model=False,
                  **args):
         super(CSPResNet, self).__init__()
         self.use_checkpoint = use_checkpoint
@@ -297,8 +298,8 @@ class CSPResNet(nn.Layer):
         if use_checkpoint:
             paddle.seed(0)
 
-        self.normalize_in_model = 'no'
-        if self.normalize_in_model == 'yes':
+        self.normalize_in_model = export_model
+        if self.normalize_in_model:
             # BCHW 1x3x1x1
             mean = [0.0, 0.0, 0.0]
             std  = [1.0, 1.0, 1.0]
@@ -317,7 +318,7 @@ class CSPResNet(nn.Layer):
 
     def forward(self, inputs):
         
-        if self.normalize_in_model == 'yes':
+        if self.normalize_in_model:
             x = (inputs['image'] / 255.0 - self.mean) / self.std
         else:
             x = inputs['image']

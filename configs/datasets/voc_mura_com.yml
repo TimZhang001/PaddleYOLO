@@ -1,6 +1,6 @@
 metric: VOC
 map_type: 11point
-num_classes: 8
+num_classes: 9
 
 TrainDataset:
   name: VOCDataSet

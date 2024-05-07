@@ -23,6 +23,7 @@ import numpy as np
 from .base import MyEncoder, is_pic, get_encoding, add_text_file
 from matplotlib import pyplot as plt
 import xml.dom.minidom as minidom
+from .defect_type import MuraCommList, MuraLineList, MuraAllList
 
 class X2VOC(object):
     def __init__(self):
@@ -67,8 +68,8 @@ class LabelMe2VOC(X2VOC):
 
     def __init__(self, target_size=512):
         self.defect_info = {}
-        self.comm_list   = ("Blob",  "Ring",  "Zara",   "Twill",   "HShort", "VShort", "Gap", "Dirty", "holeMura", "OK")
-        self.line_list   = ("HLine", "VLine", "HBlock", "VBlock",  "HSplit", "VSplit") #"MultiLine"
+        self.comm_list   = MuraCommList
+        self.line_list   = MuraLineList
         self.target_size = target_size
 
     # 解析缺陷信息
@@ -95,18 +96,23 @@ class LabelMe2VOC(X2VOC):
         label = shape["label"]
         
         # 对标签进行个性化修改 多个类别
-        if 0:
+        if 1:
             if project_type == "Commons" and label not in self.comm_list:
-                return None, None, None, None, None
+                if label == "HLine":
+                    label = "HShort"
+                elif label == "VLine":
+                    label = "VShort"
+                else:
+                    return None, None, None, None, None
             elif project_type == "Lines" and label not in self.line_list:
-                return None, None, None, None, None
+                if label == "HShort":
+                    label = "HLine"
+                elif label == "VShort":
+                    label = "VLine"
+                else:
+                    return None, None, None, None, None
             elif project_type == "Alls":
-                if label == "VBlock2":
-                    label = "VBlock"
-                if label == "HBlock1":
-                    label = "HBlock"
-                if label == "Blob":
-                    label = "Dirty"
+                pass
         
         # 对标签进行个性化修改 单个类别
         if 0:
@@ -283,9 +289,7 @@ class LabelMe2VOC(X2VOC):
                     h = json_info["imageHeight"]
                     w = json_info["imageWidth"]
 
-                    if h != self.target_size or w != self.target_size:
-                        #print("The size of the image is not consistent with the target size: {}.".format(img_name))
-                    
+                    if h != self.target_size or w != self.target_size:                  
                         img_file  = osp.join(image_dir, img_name)
                         im_data   = cv2.imread(img_file)
                         scale_x, scale_y = self.target_size / w, self.target_size / h
