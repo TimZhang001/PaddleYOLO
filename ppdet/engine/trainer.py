@@ -39,7 +39,7 @@ from ppdet.optimizer import ModelEMA
 
 from ppdet.core.workspace import create
 from ppdet.utils.checkpoint import load_weight, load_pretrain_weight
-from ppdet.utils.visualizer import visualize_results, save_result
+from ppdet.utils.visualizer import visualize_results, save_result, save_train_images
 from ppdet.metrics import Metric, COCOMetric, VOCMetric, get_infer_results
 from ppdet.data.source.category import get_categories
 import ppdet.utils.stats as stats
@@ -61,7 +61,7 @@ __all__ = ['Trainer']
 
 
 class Trainer(object):
-    def __init__(self, cfg, mode='train', export_model=False):
+    def __init__(self, cfg, mode='train', tim_eval=False):
         self.cfg = cfg.copy()
         assert mode.lower() in ['train', 'eval', 'test'], \
                 "mode should be 'train', 'eval' or 'test'"
@@ -84,6 +84,11 @@ class Trainer(object):
         if self.mode in ['train', 'eval', 'test']:
             self.dataset = self.cfg['{}Dataset'.format(capital_mode)] = create(
                 '{}Dataset'.format(capital_mode))()
+            if tim_eval:
+                tim_anno_path = "all.txt"
+                tmp_anno_path = os.path.join(self.dataset.dataset_dir, tim_anno_path)
+                assert os.path.exists(tmp_anno_path), "Please provide the annotation file for TIM evaluation."
+                self.dataset.anno_path = tim_anno_path
 
         if self.mode == 'train':
             self.loader = create('{}Reader'.format(capital_mode))(
@@ -255,6 +260,7 @@ class Trainer(object):
                 if 'output_eval' in self.cfg else None
             save_prediction_only = self.cfg.get('save_prediction_only', False)
             out_dir = os.path.dirname(self.cfg.get('weights', None))
+            save_mo_curve = True if self.mode == 'eval' else False
             self._metrics = [
                 VOCMetric(
                     label_list=self.dataset.get_label_list(),
@@ -263,7 +269,8 @@ class Trainer(object):
                     classwise=classwise,
                     output_eval=output_eval,
                     save_prediction_only=save_prediction_only,
-                    out_dir=out_dir)
+                    out_dir=out_dir,
+                    save_mo_curve=save_mo_curve)
             ]
         else:
             logger.warning("Metric not support for metric type {}".format(
@@ -372,23 +379,12 @@ class Trainer(object):
             self.loader.dataset.set_epoch(epoch_id)
             model.train()
             iter_tic = time.time()
-            save_train_data = True
+            save_train_data = True if epoch_id % 10 == 0 else False
             for step_id, data in enumerate(self.loader):
                 
                 # 每个epoch的第一个batch保存训练数据，分析数据增强后的图像是否满足要求
-                if save_train_data:
-                    save_train_data = False
-                    train_image = data['image']
-                    train_image = train_image.numpy().transpose((0, 2, 3, 1))
-                    save_image  = np.zeros((train_image.shape[1], train_image.shape[2]*train_image.shape[0], train_image.shape[3]), dtype=np.uint8)
-                    save_image  = save_image.astype(np.uint8)
-                    for i in range(len(train_image)):
-                        image = (train_image[i] * 255).astype(np.uint8)
-                        save_image[:, i*train_image.shape[2]:(i+1)*train_image.shape[2], :] = image
-                    out_dir = os.path.dirname(self.cfg.get('weights', None))
-                    os.makedirs(out_dir, exist_ok=True)
-                    cv2.imwrite(os.path.join(out_dir, 'train_image_{:03d}.tif'.format(epoch_id)), save_image)
-                    
+                save_train_data = save_train_images(save_train_data, data['image'], epoch_id, self.cfg)
+     
                 if self.cfg.architecture in [
                         'YOLOv5', 'YOLOv6', 'YOLOv7', 'YOLOv8'
                 ]:
@@ -523,7 +519,7 @@ class Trainer(object):
         self._compose_callback.on_train_end(self.status)
 
     def _eval_with_loader(self, loader, 
-                          epoch_id=0, visualize=False, draw_threshold=0.5, output_eval=None):
+                          epoch_id=0, save_result=False, draw_threshold=0.5, output_eval=None):
         sample_num = 0
         tic = time.time()
         self._compose_callback.on_epoch_begin(self.status)
@@ -599,8 +595,8 @@ class Trainer(object):
                     
                     # 根据bboxs、class_ids和bbox_res计算bbox_res的iou
                     save_flg     = cal_bboxs_iou(bboxs, class_ids, clsid2catid, draw_threshold, bbox_res)
-                    #if save_flg == 0:
-                    #    continue
+                    if save_flg == 0:
+                        continue
                     
                     # 预测结果的显示
                     image_pred   = visualize_results(image, bbox_res, mask_res, segm_res, keypoint_res,
@@ -653,7 +649,7 @@ class Trainer(object):
         # reset metric states for metric may performed multiple times
         self._reset_metrics()
 
-    def evaluate(self, draw_threshold, output_eval):
+    def evaluate(self, save_result, draw_threshold, output_eval):
         # get distributed model
         if self.cfg.get('fleet', False):
             self.model = fleet.distributed_model(self.model)
@@ -665,7 +661,7 @@ class Trainer(object):
                 self.model, find_unused_parameters=find_unused_parameters)
         with paddle.no_grad():
             self._eval_with_loader(self.loader, 
-                                   epoch_id=9999, visualize=False, 
+                                   epoch_id=9999, save_result=save_result, 
                                    draw_threshold = draw_threshold,
                                    output_eval=output_eval)
 

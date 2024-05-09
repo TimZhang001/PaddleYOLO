@@ -92,6 +92,10 @@ def main():
     if FLAGS.slim_config:
         cfg = build_slim_model(cfg, FLAGS.slim_config, mode='test')
 
+    # 针对导出模型的配置进行修改，增加export_model参数
+    if 'export_model' not in cfg[cfg[cfg['architecture']]['backbone']]:
+        cfg[cfg[cfg['architecture']]['backbone']]['export_model'] = True
+    
     # FIXME: Temporarily solve the priority problem of FLAGS.opt
     merge_config(FLAGS.opt)
     check_config(cfg)

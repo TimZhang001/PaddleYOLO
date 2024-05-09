@@ -5,7 +5,7 @@ from label_tools.dataset_split.voc_split import split_voc_dataset
 
 if __name__ == "__main__":
     
-    project_path  = "/raid/zhangss/dataset/Detection/Mura_Project_Large" #Mura_Project_Large Mura_Project_Small Mura_Project_AD
+    project_path  = "/raid/zhangss/dataset/Detection/Mura_Project_AD" #Mura_Project_Large Mura_Project_Small Mura_Project_AD
     project_types = ["Alls"] # "Alls"
     #project_types = ["Commons"]
     target_size   = 1280 if "Large" in project_path  or "AD" in project_path else  512

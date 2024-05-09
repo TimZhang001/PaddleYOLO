@@ -272,7 +272,7 @@ class DetectionMAP(object):
         self.eval_results = eval_results
         self.mAP = mAP / float(valid_cnt) if valid_cnt > 0 else mAP
 
-    def get_map(self, out_dir=None, epoch_id=None):
+    def get_map(self, out_dir=None, epoch_id=None, save_mo_curve=False):
         """
         Get mAP result
         """
@@ -293,11 +293,12 @@ class DetectionMAP(object):
                 results_per_category.append((str(eval_result['class']), '{:0.3f}'.format(float(eval_result['ap']))))
                 out_dir  = out_dir if out_dir else 'voc_pr_curve'
                 epoch_id = epoch_id if epoch_id else 0
-                draw_pr_curve(eval_result['precision'],
-                              eval_result['recall'],
-                              eval_result['score'],
-                              out_dir=os.path.join(out_dir, 'epoch_{:03d}'.format(epoch_id)),
-                              class_name=eval_result['class'])
+                if save_mo_curve:
+                    draw_pr_curve(eval_result['precision'],
+                                eval_result['recall'],
+                                eval_result['score'],
+                                out_dir=os.path.join(out_dir, 'epoch_{:03d}'.format(epoch_id)),
+                                class_name=eval_result['class'])
 
             num_columns     = min(6, len(results_per_category) * 2)
             results_flatten = list(itertools.chain(*results_per_category))

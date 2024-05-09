@@ -59,6 +59,16 @@ def parse_args():
         default=None,
         type=str,
         help="Configuration file of slim method.")
+    
+    parser.add_argument(
+        "--save_result",
+        action='store_true',
+        help="Whether to save_result the images.")
+    
+    parser.add_argument(
+        "--tim_eval",
+        action='store_true',
+        help="Whether to eval train and val images.")
 
     # TODO: bias should be unified
     parser.add_argument(
@@ -140,7 +150,7 @@ def run(FLAGS, cfg):
     output_eval = os.path.join(os.path.dirname(cfg['weights']), FLAGS.output_eval)
 
     # build trainer
-    trainer = Trainer(cfg, mode='eval')
+    trainer = Trainer(cfg, mode='eval', tim_eval=FLAGS.tim_eval)
 
     # load weights
     trainer.load_weights(cfg.eval_weights)
@@ -154,7 +164,7 @@ def run(FLAGS, cfg):
             match_threshold=FLAGS.match_threshold,
             match_metric=FLAGS.match_metric)
     else:
-        trainer.evaluate(FLAGS.draw_threshold, output_eval)
+        trainer.evaluate(FLAGS.save_result, FLAGS.draw_threshold, output_eval)
 
 
 def main():

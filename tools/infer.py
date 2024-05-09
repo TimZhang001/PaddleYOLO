@@ -45,7 +45,7 @@ def parse_args():
     parser.add_argument(
         "--infer_dir",
         type=str,
-        default="/raid/zhangss/dataset/Detection/Mura_Project/Commons/02_JPEGImages/",
+        default="/raid/zhangss/dataset/Detection/Mura_Project_AD/Alls/02_JPEGImages/",
         help="Directory for images to perform inference on.")
     parser.add_argument(
         "--infer_img",
@@ -160,7 +160,7 @@ def run(FLAGS, cfg):
     trainer = Trainer(cfg, mode='test')
 
     # load weights
-    trainer.load_weights(cfg.weights)
+    trainer.load_weights(cfg.eval_weights)
 
     # get inference images
     images = get_test_images(FLAGS.infer_dir, FLAGS.infer_img)

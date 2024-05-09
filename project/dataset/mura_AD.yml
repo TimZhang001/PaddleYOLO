@@ -14,7 +14,7 @@ TrainDataset:
 EvalDataset:
   name: VOCDataSet
   dataset_dir: /raid/zhangss/dataset/Detection/Mura_Project_AD/Alls/
-  anno_path: val.txt
+  anno_path: val.txt 
   label_list: label_list.txt
   data_fields: ['image', 'gt_bbox', 'gt_class', 'difficult']
 

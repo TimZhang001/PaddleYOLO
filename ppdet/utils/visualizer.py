@@ -21,6 +21,8 @@ import numpy as np
 from PIL import Image, ImageDraw
 import cv2
 import math
+import scipy.ndimage as ndimage
+import os
 
 from .colormap import colormap
 from ppdet.utils.logger import setup_logger
@@ -54,6 +56,10 @@ def visualize_results(image,
         image = draw_pose3d(image, pose3d, visual_thread=threshold)
     return image
 
+def get_color(idx):
+    idx = idx * 3
+    color = ((37 * idx) % 255, (17 * idx) % 255, (29 * idx) % 255)
+    return color
 
 def draw_mask(image, im_id, segms, threshold, alpha=0.7):
     """
@@ -383,7 +389,7 @@ def draw_pose3d(image,
     else:
         print(
             "not defined joints number :{}, cannot visualize because unknown of joint connectivity".
-            format(pose.shape[0]))
+            format(pose3d.shape[0]))
         return
 
     def draw3Dpose(pose3d,
@@ -481,3 +487,21 @@ def draw_pose3d(image,
         data.save(save_name)
     else:
         return data
+
+
+def save_train_images(save_train_data, train_image, epoch_id, cfg):
+    if not save_train_data:
+        return save_train_data
+    
+    save_train_data = False
+    train_image = train_image.numpy().transpose((0, 2, 3, 1))
+    save_image  = np.zeros((train_image.shape[1], train_image.shape[2]*train_image.shape[0], train_image.shape[3]), dtype=np.uint8)
+    save_image  = save_image.astype(np.uint8)
+    for i in range(len(train_image)):
+        image = (train_image[i] * 255).astype(np.uint8)
+        save_image[:, i*train_image.shape[2]:(i+1)*train_image.shape[2], :] = image
+    out_dir = os.path.dirname(cfg.get('weights', None))
+    os.makedirs(out_dir, exist_ok=True)
+    cv2.imwrite(os.path.join(out_dir, 'train_image_{:03d}.tif'.format(epoch_id)), save_image)
+
+    return save_train_data

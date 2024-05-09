@@ -9,6 +9,7 @@ _BASE_: [
 log_iter: 100
 snapshot_epoch: 4
 weights: output/ppyoloe_plus_crn_m_80e_mura_small/model_final
+eval_weights: output/ppyoloe_plus_crn_m_80e_mura_small/best_model
 #save_dir: output/ppyoloe_plus_crn_m_80e_mura_small
 #gpu_ids: 3
 classwise: True
