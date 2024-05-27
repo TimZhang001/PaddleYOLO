@@ -7,7 +7,7 @@ log_dir=log_dir/${job_name}
 #CUDA_VISIBLE_DEVICES=4 python tools/train.py -c ${config} --eval --amp --vdl_log_dir vdl_log_dir/${job_name}
 
 # 2.评估，加 --classwise 表示输出每一类mAP
-CUDA_VISIBLE_DEVICES=4 python tools/eval.py -c ${config} --classwise --visualize
+CUDA_VISIBLE_DEVICES=4 python tools/eval.py -c ${config} --classwise --save_result --tim_eval
 
 # 3.预测 (单张图/图片文件夹）
 #CUDA_VISIBLE_DEVICES=0 python tools/infer.py -c ${config} -o weights=${weights} --infer_img=demo/000000014439_640x640.jpg --draw_threshold=0.5

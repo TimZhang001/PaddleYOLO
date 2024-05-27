@@ -7,7 +7,7 @@ log_dir=log_dir/${job_name}
 #CUDA_VISIBLE_DEVICES=3 python tools/train.py -c ${config} --eval --amp --vdl_log_dir vdl_log_dir/${job_name}
 
 # 2.评估，加 --classwise 表示输出每一类mAP
-CUDA_VISIBLE_DEVICES=3 python tools/eval.py -c ${config} --classwise  --visualize
+CUDA_VISIBLE_DEVICES=3 python tools/eval.py -c ${config} --classwise  --save_result --tim_eval
 
 # 3.预测 (单张图/图片文件夹）
 #CUDA_VISIBLE_DEVICES=3 python tools/infer.py -c ${config} --infer_dir /raid/zhangss/dataset/Detection/Mura_Project_Large/Alls/02_JPEGImages/
