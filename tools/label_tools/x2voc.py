@@ -24,6 +24,7 @@ from .base import MyEncoder, is_pic, get_encoding, add_text_file
 from matplotlib import pyplot as plt
 import xml.dom.minidom as minidom
 from .defect_type import MuraCommList, MuraLineList, MuraAllList
+from tqdm import tqdm 
 
 class X2VOC(object):
     def __init__(self):
@@ -71,6 +72,7 @@ class LabelMe2VOC(X2VOC):
         self.comm_list   = MuraCommList
         self.line_list   = MuraLineList
         self.target_size = target_size
+        self.min_size    = 8
 
     # 解析缺陷信息
     def _parse_defect_info(self, shape, project_type):
@@ -96,7 +98,7 @@ class LabelMe2VOC(X2VOC):
         label = shape["label"]
         
         # 对标签进行个性化修改 多个类别
-        if 1:
+        if 0:
             if project_type == "Commons" and label not in self.comm_list:
                 if label == "HLine":
                     label = "HShort"
@@ -128,6 +130,24 @@ class LabelMe2VOC(X2VOC):
                     label = "Line"
             elif project_type == "Alls":
                 label = "defect"
+
+        # 对标签的最小宽度和最小高度进行限制 如果小于self.min_size个像素点，设置为self.min_size个像素点
+        if xmax - xmin < self.min_size:
+            diff_val = int((self.min_size - (xmax - xmin)) / 2 + 0.5)
+            if xmax + diff_val < self.target_size:
+                xmax = xmax + diff_val
+            else:
+                xmax = self.target_size
+
+            if xmin - diff_val > 0:
+                xmin = xmin - diff_val
+            else:
+                xmin = 0
+
+        if ymax - ymin < self.min_size:
+            diff_val = int((self.min_size - (ymax - ymin)) / 2 + 0.5)
+            ymax = ymax + diff_val if ymax + diff_val < self.target_size else self.target_size
+            ymin = ymin - diff_val if ymin - diff_val > 0 else 0
 
         return xmin, ymin, xmax, ymax, label
         
@@ -183,6 +203,10 @@ class LabelMe2VOC(X2VOC):
         project_dir           = osp.dirname(image_dir)
         defect_statistic_file = osp.join(project_dir, "04_DefectStatistic")
         os.makedirs(defect_statistic_file, exist_ok=True)
+
+        # 删除defect_statistic_file文件夹下的所有文件
+        for file in os.listdir(defect_statistic_file):
+            os.remove(osp.join(defect_statistic_file, file))
 
         # 创建一个文本文件进行信息的保存
         file_name = osp.join(defect_statistic_file, "000_defect_info.txt")
@@ -262,8 +286,14 @@ class LabelMe2VOC(X2VOC):
     # 
     def json2xml(self, image_dir, json_dir, xml_dir, project_type):
                 
+        # 删除xml_dir中的所有文件
+        if osp.exists(xml_dir):
+            shutil.rmtree(xml_dir)
+        os.makedirs(xml_dir, exist_ok=True)
+        
+        # 逐个处理
         self.defect_info = {}
-        for img_name in os.listdir(image_dir):
+        for img_name in tqdm(os.listdir(image_dir)):
             img_name_part = osp.splitext(img_name)[0]
             json_file     = osp.join(json_dir, img_name_part + ".json")
             

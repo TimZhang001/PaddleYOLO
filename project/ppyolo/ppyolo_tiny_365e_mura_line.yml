@@ -1,0 +1,15 @@
+_BASE_: [
+  '../dataset/mura_lines.yml',
+  '../runtime.yml',
+  './_base_/ppyolo_tiny.yml',
+  './_base_/optimizer_365e.yml',
+  './_base_/ppyolo_tiny_reader.yml',
+]
+
+log_iter: 100
+snapshot_epoch: 4
+weights: output/ppyolo_tiny_365e_mura_line/model_final
+eval_weights: output/ppyolo_tiny_365e_mura_line/best_model
+classwise: True
+
+#pretrain_weights: output/ppyolo_tiny_365e_mura_line/best_model

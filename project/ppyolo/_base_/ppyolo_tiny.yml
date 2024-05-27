@@ -1,5 +1,5 @@
 architecture: YOLOv3
-pretrain_weights: https://paddledet.bj.bcebos.com/models/pretrained/MobileNetV3_large_x0_5_pretrained.pdparams
+pretrain_weights: https://paddledet.bj.bcebos.com/models/pretrained/MobileNetV3_large_x1_0_pretrained.pdparams
 norm_type: sync_bn
 use_ema: true
 ema_decay: 0.9998
@@ -12,7 +12,7 @@ YOLOv3:
 
 MobileNetV3:
   model_name: large
-  scale: .5
+  scale: 1.0
   with_extra_blocks: false
   extra_block_filters: []
   feature_maps: [7, 13, 16]
@@ -23,16 +23,15 @@ PPYOLOTinyFPN:
   drop_block: true
 
 YOLOv3Head:
-  anchors: [[10, 15], [24, 36], [72, 42],
-            [35, 87], [102, 96], [60, 170],
-            [220, 125], [128, 222], [264, 266]]
+  #anchors: [[10, 15], [24, 36], [72, 42], [35, 87], [102, 96], [60, 170], [220, 125], [128, 222], [264, 266]]
+  anchors: [[492, 6], [7, 491],  [465, 10], [13, 481], [477, 14], [21, 505],  [510, 21], [508, 44],  [52, 496]]
   anchor_masks: [[6, 7, 8], [3, 4, 5], [0, 1, 2]]
   loss: YOLOv3Loss
 
 YOLOv3Loss:
-  ignore_thresh: 0.5
+  ignore_thresh: 0.7 # default 0.5
   downsample: [32, 16, 8]
-  label_smooth: false
+  label_smooth: true # default false
   scale_x_y: 1.05
   iou_loss: IouLoss
 
@@ -50,6 +49,6 @@ BBoxPostProcess:
   nms:
     name: MultiClassNMS
     keep_top_k: 100
-    nms_threshold: 0.45
+    nms_threshold: 0.30 #default 0.45
     nms_top_k: 1000
     score_threshold: 0.005

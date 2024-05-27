@@ -63,11 +63,13 @@ def parse_args():
     parser.add_argument(
         "--save_result",
         action='store_true',
+        default=False, # default is False
         help="Whether to save_result the images.")
     
     parser.add_argument(
         "--tim_eval",
         action='store_true',
+        default=False, # default is False
         help="Whether to eval train and val images.")
 
     # TODO: bias should be unified
@@ -176,7 +178,7 @@ def main():
     if 'draw_threshold' in cfg:
         FLAGS.draw_threshold = cfg["draw_threshold"]
     else:
-        FLAGS.draw_threshold = 0.15
+        FLAGS.draw_threshold = 0.25
 
     # disable npu in config by default
     if 'use_npu' not in cfg:

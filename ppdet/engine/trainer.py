@@ -563,7 +563,7 @@ class Trainer(object):
                     outs[key] = value.numpy()
 
             # 进行图像的保存
-            if visualize:
+            if save_result:
                 clsid2catid = self.dataset.cname2cid
                 batch_res   = get_infer_results(outs, list(clsid2catid.values()))
                 bbox_num    = outs['bbox_num']

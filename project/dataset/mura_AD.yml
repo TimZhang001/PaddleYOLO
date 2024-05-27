@@ -1,10 +1,11 @@
 metric: VOC
 map_type: 11point
 num_classes: 2
+set_dataset_dir: &set_dataset_dir /raid/zhangss/dataset/Detection/Mura_Project_AD/Alls/
 
 TrainDataset:
   name: VOCDataSet
-  dataset_dir: /raid/zhangss/dataset/Detection/Mura_Project_AD/Alls/
+  dataset_dir: *set_dataset_dir
   anno_path: train.txt
   label_list: label_list.txt
   data_fields: ['image', 'gt_bbox', 'gt_class', 'difficult']
@@ -13,7 +14,7 @@ TrainDataset:
 
 EvalDataset:
   name: VOCDataSet
-  dataset_dir: /raid/zhangss/dataset/Detection/Mura_Project_AD/Alls/
+  dataset_dir: *set_dataset_dir
   anno_path: val.txt 
   label_list: label_list.txt
   data_fields: ['image', 'gt_bbox', 'gt_class', 'difficult']

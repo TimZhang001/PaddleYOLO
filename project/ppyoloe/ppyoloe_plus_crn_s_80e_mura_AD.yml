@@ -1,0 +1,22 @@
+_BASE_: [
+  '../dataset/mura_AD.yml',
+  '../runtime.yml',
+  './_base_/optimizer_80e.yml',
+  './_base_/ppyoloe_plus_crn.yml',
+  './_base_/ppyoloe_plus_reader_large.yml',
+]
+
+log_iter: 100
+snapshot_epoch: 2
+weights: output/ppyoloe_plus_crn_s_80e_mura_AD/model_final
+eval_weights: output/ppyoloe_plus_crn_s_80e_mura_AD/best_model
+#save_dir: output/ppyoloe_plus_crn_m_80e_mura_AD
+#gpu_ids: 3
+classwise: True
+
+pretrain_weights: https://bj.bcebos.com/v1/paddledet/models/ppyoloe_plus_crn_s_80e_coco.pdparams
+depth_mult: 0.33
+width_mult: 0.50
+
+LearningRate:
+  base_lr: 0.000125 # 0.001 / 8 

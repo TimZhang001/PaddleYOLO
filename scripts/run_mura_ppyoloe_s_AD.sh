@@ -1,5 +1,5 @@
 model_name=ppyoloe # 可修改，如 yolov7
-job_name=ppyoloe_plus_crn_m_80e_mura_AD # 可修改，如 yolov7_tiny_300e_coco
+job_name=ppyoloe_plus_crn_s_80e_mura_AD # 可修改，如 yolov7_tiny_300e_coco
 config=project/${model_name}/${job_name}.yml
 log_dir=log_dir/${job_name}
 

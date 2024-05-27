@@ -5,8 +5,8 @@ from label_tools.dataset_split.voc_split import split_voc_dataset
 
 if __name__ == "__main__":
     
-    project_path  = "/raid/zhangss/dataset/Detection/Mura_Project_AD" #Mura_Project_Large Mura_Project_Small Mura_Project_AD
-    project_types = ["Alls"] # "Alls"
+    project_path  = "/raid/zhangss/dataset/Detection" #Mura_Project_Large Mura_Project_Small Mura_Project_AD Common Lines
+    project_types = ["Lines"] # "Alls" Common  Lines
     #project_types = ["Commons"]
     target_size   = 1280 if "Large" in project_path  or "AD" in project_path else  512
     
@@ -26,6 +26,7 @@ if __name__ == "__main__":
             json2voc.defect_statistic(image_dir, json_dir)
             print("Convert {} Done!".format(project_type))
 
+    if 0:
         # 将数据集划分为训练集(0.8)、验证集(0.1)和测试集(0.1) ----------------------------------------------
         for project_type in project_types:
             dataset_dir  = "{}/{}".format(project_path, project_type)

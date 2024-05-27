@@ -99,6 +99,7 @@ def draw_bbox(image, im_id, catid2name, bboxes, threshold):
     Draw bbox on image
     """
     draw = ImageDraw.Draw(image)
+    image_width, image_height = image.size
 
     catid2color = {}
     color_list = colormap(rgb=True)[:40]
@@ -146,9 +147,10 @@ def draw_bbox(image, im_id, catid2name, bboxes, threshold):
         # draw label
         text = "{} {:.2f}".format(catid2name[catid], score)
         tw, th = draw.textsize(text)
-        draw.rectangle(
-            [(xmin + 1, ymin - th), (xmin + tw + 1, ymin)], fill=color)
-        draw.text((xmin + 1, ymin - th), text, fill=(255, 255, 255))
+        draw.rectangle([(xmin + 1, ymin - th), (xmin + tw + 1, ymin)], fill=color)
+        text_xmin = min(max(xmin + 1,  5), image_width - tw - 5)
+        text_ymin = min(max(ymin - th, 5), image_height - th - 5)
+        draw.text((text_xmin, text_ymin), text, fill=(255, 255, 255))
 
     return image
 

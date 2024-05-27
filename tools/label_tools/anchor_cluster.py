@@ -186,7 +186,7 @@ class YOLOv2AnchorCluster(BaseAnchorCluster):
 def main():
     parser = ArgsParser()
     parser.add_argument(
-        '--n', '-n', default=6, type=int, help='num of clusters')
+        '--n', '-n', default=9, type=int, help='num of clusters')
     parser.add_argument(
         '--iters',
         '-i',

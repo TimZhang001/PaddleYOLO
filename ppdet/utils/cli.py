@@ -48,8 +48,7 @@ class ArgsParser(ArgumentParser):
         super(ArgsParser, self).__init__(
             formatter_class=RawDescriptionHelpFormatter)
         # "configs/Mura/ppyoloe/ppyoloe_plus_crn_s_80e_coco.yml"
-        self.add_argument("-c", "--config", help="configuration file to use", 
-                          default="project/ppyoloe/ppyoloe_plus_crn_m_80e_mura_AD.yml")
+        self.add_argument("-c", "--config", help="configuration file to use",  default="project/ppyolo/ppyolo_tiny_650e_mura.yml")
         self.add_argument(
             "-o", "--opt", nargs='*', help="set configuration options")
 

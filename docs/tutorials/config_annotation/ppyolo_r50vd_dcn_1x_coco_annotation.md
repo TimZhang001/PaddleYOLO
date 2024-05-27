@@ -107,7 +107,7 @@ TrainReader:
   # 是否丢弃最后不能完整组成batch的数据
   drop_last: true
   # mixup_epoch，大于最大epoch，表示训练过程一直使用mixup数据增广
-  mixup_epoch: 25000
+  mixup_epoch: -1
   # 是否通过共享内存进行数据读取加速，需要保证共享内存大小(如/dev/shm)满足大于1G
   use_shared_memory: true
 

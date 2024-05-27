@@ -131,7 +131,7 @@ def cal_bboxs_iou(bboxs_gt, class_ids_gt, catid2name, draw_thresh, bboxs_res):
     Calculate iou between bboxs_gt and bboxs_res
     """
     
-    iou_thresh   = 0.30
+    iou_thresh   = 0.20
     bboxs_gt     = bboxs_gt.tolist()
     bboxs_gt_new = []
     for bbox_gt in bboxs_gt:

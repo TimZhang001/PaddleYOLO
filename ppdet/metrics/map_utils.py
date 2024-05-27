@@ -55,7 +55,6 @@ def draw_pr_curve(precision,
         plt.ylabel('Precision')
         plt.grid(True)
         plt.plot(recall, precision)
-        #plt.show()
         plt.savefig(output_path)
         plt.close()
 
@@ -73,7 +72,6 @@ def draw_pr_curve(precision,
     plt.plot(threshold, miss,     label='miss')
     plt.plot(threshold, overkill, label='overkill')
     plt.legend()
-    #plt.show()
     plt.savefig(output_path)
     plt.close()
 
