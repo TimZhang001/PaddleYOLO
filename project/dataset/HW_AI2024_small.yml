@@ -4,7 +4,7 @@ num_classes: 5
 
 TrainDataset:
   name: VOCDataSet
-  dataset_dir: D:/Dataset/AI质检2024/裁剪图片/dataset_crop_good/images/train/
+  dataset_dir: dataset/HW_AI2024/Alls/
   anno_path: train.txt
   label_list: label_list.txt
   data_fields: ['image', 'gt_bbox', 'gt_class', 'difficult']
@@ -13,11 +13,11 @@ TrainDataset:
 
 EvalDataset:
   name: VOCDataSet
-  dataset_dir: D:/Dataset/AI质检2024/裁剪图片/dataset_crop_good/images/val/
+  dataset_dir: dataset/HW_AI2024/Alls/
   anno_path: val.txt # train.txt val.txt
   label_list: label_list.txt
   data_fields: ['image', 'gt_bbox', 'gt_class', 'difficult']
 
 TestDataset:
   name: ImageFolder
-  anno_path: D:/Dataset/AI质检2024/裁剪图片/dataset_crop_good/images/label_list.txt
+  anno_path: dataset/HW_AI2024/Alls/label_list.txt
