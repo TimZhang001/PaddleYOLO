@@ -1,0 +1,48 @@
+The defect information of the dataset:
+
+The defect information of Mouse_bite:
+The number of the defects: 591
+The mean and var of the defect width:  19.05, 9.62
+The mean and var of the defect height: 16.09, 8.51
+The mean and var of the defect area:   349.18, 384.61
+The mean and var of the defect aspect ratio: 1.26, 0.46
+
+
+The defect information of Open_circuit:
+The number of the defects: 277
+The mean and var of the defect width:  17.43, 11.73
+The mean and var of the defect height: 25.27, 16.99
+The mean and var of the defect area:   533.45, 879.51
+The mean and var of the defect aspect ratio: 0.87, 0.61
+
+
+The defect information of Short:
+The number of the defects: 203
+The mean and var of the defect width:  21.87, 16.71
+The mean and var of the defect height: 21.42, 16.39
+The mean and var of the defect area:   541.16, 754.06
+The mean and var of the defect aspect ratio: 1.31, 1.12
+
+
+The defect information of Spurious_copper:
+The number of the defects: 288
+The mean and var of the defect width:  40.39, 24.29
+The mean and var of the defect height: 22.52, 17.89
+The mean and var of the defect area:   626.76, 382.51
+The mean and var of the defect aspect ratio: 3.44, 2.53
+
+
+The defect information of Spur:
+The number of the defects: 351
+The mean and var of the defect width:  22.64, 8.88
+The mean and var of the defect height: 13.07, 4.04
+The mean and var of the defect area:   286.31, 136.14
+The mean and var of the defect aspect ratio: 1.91, 0.83
+
+
+The number of the defects in Mouse_bite: 591
+The number of the defects in Open_circuit: 277
+The number of the defects in Short: 203
+The number of the defects in Spurious_copper: 288
+The number of the defects in Spur: 351
+The total number of the defects: 1710

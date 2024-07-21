@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+	<annotation>
+		<folder>JPEGImages</folder>
+		<filename>dataset_overlap_0.1_copy_02_Spur_Img_crop_5.png</filename>
+		<size>
+			<width>512</width>
+			<height>512</height>
+			<depth>3</depth>
+		</size>
+		<object>
+			<name>Spur</name>
+			<difficult>0</difficult>
+			<bndbox>
+				<xmin>141</xmin>
+				<ymin>240</ymin>
+				<xmax>160</xmax>
+				<ymax>251</ymax>
+			</bndbox>
+		</object>
+	</annotation>

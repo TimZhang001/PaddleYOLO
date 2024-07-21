@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+	<annotation>
+		<folder>JPEGImages</folder>
+		<filename>dataset_overlap_0.1_copy_04_Mouse_bite_crop_12.png</filename>
+		<size>
+			<width>512</width>
+			<height>512</height>
+			<depth>3</depth>
+		</size>
+	</annotation>

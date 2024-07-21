@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+	<annotation>
+		<folder>JPEGImages</folder>
+		<filename>dataset_center_crop_offset_200_repeat_2_copy_10_Mouse_bite_crop_16.png</filename>
+		<size>
+			<width>512</width>
+			<height>512</height>
+			<depth>3</depth>
+		</size>
+		<object>
+			<name>Mouse_bite</name>
+			<difficult>0</difficult>
+			<bndbox>
+				<xmin>68</xmin>
+				<ymin>454</ymin>
+				<xmax>87</xmax>
+				<ymax>473</ymax>
+			</bndbox>
+		</object>
+	</annotation>

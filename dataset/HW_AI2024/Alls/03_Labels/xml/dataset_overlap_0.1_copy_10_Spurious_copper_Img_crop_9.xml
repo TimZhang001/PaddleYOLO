@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+	<annotation>
+		<folder>JPEGImages</folder>
+		<filename>dataset_overlap_0.1_copy_10_Spurious_copper_Img_crop_9.png</filename>
+		<size>
+			<width>512</width>
+			<height>512</height>
+			<depth>3</depth>
+		</size>
+		<object>
+			<name>Spurious_copper</name>
+			<difficult>0</difficult>
+			<bndbox>
+				<xmin>356</xmin>
+				<ymin>360</ymin>
+				<xmax>367</xmax>
+				<ymax>400</ymax>
+			</bndbox>
+		</object>
+	</annotation>

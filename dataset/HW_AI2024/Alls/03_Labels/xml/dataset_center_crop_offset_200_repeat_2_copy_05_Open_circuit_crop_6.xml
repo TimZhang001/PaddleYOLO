@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+	<annotation>
+		<folder>JPEGImages</folder>
+		<filename>dataset_center_crop_offset_200_repeat_2_copy_05_Open_circuit_crop_6.png</filename>
+		<size>
+			<width>512</width>
+			<height>512</height>
+			<depth>3</depth>
+		</size>
+		<object>
+			<name>Open_circuit</name>
+			<difficult>0</difficult>
+			<bndbox>
+				<xmin>149</xmin>
+				<ymin>125</ymin>
+				<xmax>161</xmax>
+				<ymax>139</ymax>
+			</bndbox>
+		</object>
+	</annotation>

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+	<annotation>
+		<folder>JPEGImages</folder>
+		<filename>dataset_center_crop_offset_200_repeat_2_copy_10_Short_Img_crop_4.png</filename>
+		<size>
+			<width>512</width>
+			<height>512</height>
+			<depth>3</depth>
+		</size>
+		<object>
+			<name>Short</name>
+			<difficult>0</difficult>
+			<bndbox>
+				<xmin>286</xmin>
+				<ymin>220</ymin>
+				<xmax>307</xmax>
+				<ymax>235</ymax>
+			</bndbox>
+		</object>
+	</annotation>

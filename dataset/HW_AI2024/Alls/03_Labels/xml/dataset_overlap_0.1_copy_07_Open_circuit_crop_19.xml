@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+	<annotation>
+		<folder>JPEGImages</folder>
+		<filename>dataset_overlap_0.1_copy_07_Open_circuit_crop_19.png</filename>
+		<size>
+			<width>512</width>
+			<height>512</height>
+			<depth>3</depth>
+		</size>
+		<object>
+			<name>Open_circuit</name>
+			<difficult>0</difficult>
+			<bndbox>
+				<xmin>455</xmin>
+				<ymin>54</ymin>
+				<xmax>468</xmax>
+				<ymax>72</ymax>
+			</bndbox>
+		</object>
+	</annotation>

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+	<annotation>
+		<folder>JPEGImages</folder>
+		<filename>dataset_overlap_0.15_copy_06_Mouse_bite_crop_16.png</filename>
+		<size>
+			<width>512</width>
+			<height>512</height>
+			<depth>3</depth>
+		</size>
+		<object>
+			<name>Mouse_bite</name>
+			<difficult>0</difficult>
+			<bndbox>
+				<xmin>475</xmin>
+				<ymin>406</ymin>
+				<xmax>490</xmax>
+				<ymax>417</ymax>
+			</bndbox>
+		</object>
+	</annotation>

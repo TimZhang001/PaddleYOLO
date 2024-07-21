@@ -75,7 +75,7 @@ class LabelMe2VOC(X2VOC):
         self.min_size    = 8
 
     # 解析缺陷信息
-    def _parse_defect_info(self, shape, project_type):
+    def _parse_defect_info(self, shape, project_type="Alls"):
 
         if len(shape) == 0:
             return None, None, None, None, None
